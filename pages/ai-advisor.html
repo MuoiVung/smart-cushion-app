@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Health Advisor - PostureAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .mono-precision { font-family: 'JetBrains Mono', monospace; }
+        .glass-insight {
+            background: rgba(113, 42, 226, 0.08);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#00685f",
+                        "on-tertiary-container": "#f7fff2",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed": "#eaddff",
+                        "tertiary-fixed-dim": "#62df7d",
+                        "surface-tint": "#006a61",
+                        "on-primary-container": "#f4fffc",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "secondary": "#712ae2",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#fffbff",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-primary": "#6bd8cb",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container": "#e5eeff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface-variant": "#3d4947",
+                        "on-tertiary-fixed-variant": "#005320",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#bcc9c6",
+                        "outline": "#6d7a77",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-primary-fixed": "#00201d",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed": "#25005a",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed-variant": "#5a00c6",
+                        "tertiary-container": "#00873a",
+                        "primary-fixed": "#89f5e7",
+                        "on-tertiary-fixed": "#002109",
+                        "tertiary-fixed": "#7ffc97",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary": "#006b2c",
+                        "secondary-container": "#8a4cfc",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#008378",
+                        "secondary-fixed-dim": "#d2bbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+<link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- SideNavBar Anchor -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#eff4ff] flex flex-col py-8 gap-y-2 z-50">
+<div class="px-8 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+<div>
+<h2 class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-on-surface">Clinical Portal</h2>
+<p class="text-[10px] text-on-surface/60">Dr. Smith's Dashboard</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span> Home
+            </a>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">videocam</span> Live Monitor
+            </a>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">insights</span> Insights
+            </a>
+<!-- Active State: AI Advisor -->
+<a class="flex items-center gap-4 text-[#00685f] font-black bg-white/50 rounded-l-full ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span> AI Advisor
+            </a>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">history</span> Session History
+            </a>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+<div class="mt-auto px-4 space-y-1">
+<button class="w-full bg-primary text-white py-4 rounded-xl font-bold tracking-tight mb-4 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add_circle</span> Start New Session
+            </button>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">help</span> Help Center
+            </a>
+<a class="flex items-center gap-4 text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 font-['Inter'] text-sm uppercase tracking-widest font-bold transition-all" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 p-12">
+<!-- TopAppBar Anchor -->
+<header class="flex justify-between items-center w-full mb-12">
+<h1 class="text-2xl font-black tracking-tighter text-[#0b1c30]">AI Health Advisor</h1>
+<div class="flex items-center gap-8 font-['Inter'] font-medium tracking-tight">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#0b1c30]/60 hover:text-[#00685f] transition-colors duration-200" href="#">Support</a>
+<a class="text-[#0b1c30]/60 hover:text-[#00685f] transition-colors duration-200" href="#">Documentation</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#0b1c30]/60 cursor-pointer">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional medical doctor headshot in clinical setting with soft natural lighting and blurred clinic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzxVP4sJQ2iRfRsuRLoNQl3gK-W-eIg7CZ3xZUNfT0HVcg4RjZsPnwYbtiruQ66mkUytvQSX72weXcOkQIj9nmm34is4ZynaI28Jj8Wv0IoqIrC25ABtl6xzJIMFFvH5tU3K3QOcwiv-wAhqahBM3HM00X0iojGDruwKDvwvROD0E3Zyr1-O9uOFeWH_wrnKaICCKQdv6RHwGxXbJSfMYBvaKieLeAgh0Ut0H1pW8yvzCOfVf5UJyPOUGGFjRNg_LWearqYbbGsxI"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Centered Chat Interface -->
+<div class="max-w-4xl mx-auto">
+<!-- Chat Window Container -->
+<div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden border border-outline-variant/10 shadow-[0_20px_40px_rgba(11,28,48,0.03)] flex flex-col h-[768px]">
+<!-- Chat Header -->
+<div class="px-8 py-6 border-b border-outline-variant/10 bg-surface-container-low/30 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-white shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">PostureAI Advisor</h3>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+<span class="text-xs font-medium text-on-surface-variant/70 uppercase tracking-widest">Powered by Claude</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">history</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Chat Messages Scroll Area -->
+<div class="flex-1 overflow-y-auto p-8 space-y-10">
+<!-- AI Message -->
+<div class="flex gap-4 items-start max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-white text-sm">auto_awesome</span>
+</div>
+<div class="space-y-4">
+<div class="p-6 rounded-[2rem] rounded-tl-none bg-secondary/5 text-on-surface leading-relaxed">
+<p class="mb-4">Based on today's clinical data, I've noticed a recurring pattern in your workstation ergonomics. Since <span class="mono-precision font-bold text-secondary">14:00</span>, there is a consistent <span class="mono-precision">7.5°</span> lateral lean to the right.</p>
+<p class="mb-4">This specific shift often correlates with "mouse arm fatigue." Your trapezius muscle is likely compensating for the repetitive reaching motion. I recommend a <span class="font-bold">90-second postural reset</span>: focus on retracting your right scapula and aligning your sternum with the center of your monitor.</p>
+<div class="glass-insight p-4 rounded-xl border border-secondary/10 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary">lightbulb</span>
+<p class="text-sm italic text-secondary">Clinical Insight: Sustained lateral leaning increases pressure on your L4-L5 vertebrae by approximately 18%.</p>
+</div>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 uppercase tracking-widest ml-2">Just now</span>
+</div>
+</div>
+<!-- User Message Example (Hidden context, just for visual flow if needed, but per prompt only AI msg was specified) -->
+</div>
+<!-- Chat Footer / Interaction Zone -->
+<div class="p-8 bg-surface-container-lowest border-t border-outline-variant/10">
+<!-- Quick Replies -->
+<div class="flex flex-wrap gap-3 mb-8 justify-center">
+<button class="px-6 py-2.5 rounded-full border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-low hover:border-secondary/30 transition-all text-on-surface-variant">
+                            How do I fix my mouse position?
+                        </button>
+<button class="px-6 py-2.5 rounded-full border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-low hover:border-secondary/30 transition-all text-on-surface-variant">
+                            Show me my fatigue heat-map
+                        </button>
+<button class="px-6 py-2.5 rounded-full border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-low hover:border-secondary/30 transition-all text-on-surface-variant">
+                            Schedule a stretch reminder
+                        </button>
+</div>
+<!-- CTA Action -->
+<div class="flex flex-col items-center">
+<button class="w-full max-w-md bg-secondary text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-secondary/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">analytics</span>
+                            Get my personalized advice
+                        </button>
+<!-- Input Bar Mockup -->
+<div class="mt-8 w-full flex items-center gap-4 bg-surface-container-low px-6 py-2 rounded-2xl border-b-2 border-outline-variant/50 focus-within:border-secondary transition-colors">
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 text-on-surface" placeholder="Ask PostureAI anything about your ergonomics..." type="text"/>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant/40 hover:text-secondary">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="p-2 text-on-surface-variant/40 hover:text-secondary">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Bento Support -->
+<div class="grid grid-cols-12 gap-6 mt-12">
+<div class="col-span-8 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/5">
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-6">Real-time Biometric Stream</h4>
+<div class="flex justify-between items-end h-32 gap-2">
+<!-- Bar chart mockup -->
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[60%]"></div>
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[40%]"></div>
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[80%]"></div>
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[95%]"></div>
+<div class="flex-1 bg-primary/30 rounded-t-lg h-[70%]"></div>
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[50%]"></div>
+<div class="flex-1 bg-secondary/40 rounded-t-lg h-[85%] border-t-2 border-secondary"></div>
+<div class="flex-1 bg-secondary/40 rounded-t-lg h-[90%] border-t-2 border-secondary"></div>
+<div class="flex-1 bg-primary/10 rounded-t-lg h-[65%]"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] mono-precision text-on-surface-variant/40">
+<span>13:00</span>
+<span>14:00 (Lean detected)</span>
+<span>15:00</span>
+</div>
+</div>
+<div class="col-span-4 bg-secondary/5 p-8 rounded-3xl border border-secondary/10 flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-secondary mb-4 text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<h4 class="font-bold text-on-surface mb-2">Posture Score</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Your current alignment is 12% better than your last session at this hour.</p>
+</div>
+<div class="text-4xl font-black text-secondary tracking-tighter">
+                        84<span class="text-sm font-normal text-on-surface-variant/50 ml-1">/100</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+<script src="../assets/js/main.js" defer></script>
+</body>
+
+</html>

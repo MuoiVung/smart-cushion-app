@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(chmod +x scripts/generate_mqtt_credentials.sh)",
+      "Bash(./scripts/generate_mqtt_credentials.sh)",
+      "Bash(open -a Docker)",
+      "Bash(docker info *)",
+      "Bash(docker stop *)"
+    ]
+  }
+}
