@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export type OccupancyState = 'occupied' | 'empty' | 'uncertain';
 export type AlertStatus    = 'IDLE' | 'WARNING' | 'COOLDOWN';
 export type PostureLabel   = 'NUP' | 'LF' | 'LB' | 'LFSR' | 'LFSL'
-                           | 'CRL' | 'CLL' | 'CRLL' | 'CLLL' | 'unknown';
+                           | 'CRL' | 'CLL' | 'CRLL' | 'CLLL' | 'EMPTY' | 'OBJECT';
 
 export interface FogRealtimeUpdate {
   record_type:            'realtime_update';

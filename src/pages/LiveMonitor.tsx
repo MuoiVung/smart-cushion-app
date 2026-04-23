@@ -15,7 +15,8 @@ const POSTURE_META: Record<PostureLabel, { label: string; icon: string; color: s
   CLL:     { label: 'Cross-Leg (Left)',         icon: 'swap_vert',       color: 'text-rose-500',    isGood: false },
   CRLL:    { label: 'Cross-Leg Deep (Right)',   icon: 'priority_high',   color: 'text-red-600',     isGood: false },
   CLLL:    { label: 'Cross-Leg Deep (Left)',    icon: 'priority_high',   color: 'text-red-600',     isGood: false },
-  unknown: { label: 'No Person',               icon: 'person_off',      color: 'text-slate-400',   isGood: false },
+  EMPTY:   { label: 'No Person',               icon: 'person_off',      color: 'text-slate-400',   isGood: false },
+  OBJECT:  { label: 'Object Detected',         icon: 'category',        color: 'text-amber-600',   isGood: false },
 };
 
 // FSR heatmap cells in row-major order: FL FM FR / ML MM MR / BL BM BR
@@ -88,8 +89,8 @@ export const LiveMonitor: React.FC = () => {
   }, [lastMessage?.alert_count]); // trigger on count change, not every message
 
   const heatmap  = lastMessage?.sensors_heatmap_pct ?? Array(9).fill(0);
-  const posture  = lastMessage?.posture ?? 'unknown';
-  const meta     = POSTURE_META[posture] ?? POSTURE_META.unknown;
+  const posture  = lastMessage?.posture ?? 'EMPTY';
+  const meta     = POSTURE_META[posture] ?? POSTURE_META.EMPTY;
   const occupancy = lastMessage?.occupancy_state ?? 'empty';
   const occupancyBadge = OCCUPANCY_BADGE[occupancy];
   const alertStatus = lastMessage?.alert_status ?? 'IDLE';
