@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PostureAI — Live Monitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#00685f",
+                    "on-tertiary-container": "#f7fff2",
+                    "on-background": "#0b1c30",
+                    "secondary-fixed": "#eaddff",
+                    "tertiary-fixed-dim": "#62df7d",
+                    "surface-tint": "#006a61",
+                    "on-primary-container": "#f4fffc",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "secondary": "#712ae2",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#6bd8cb",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#fffbff",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-primary": "#6bd8cb",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "on-surface": "#0b1c30",
+                    "surface-container": "#e5eeff",
+                    "surface-container-low": "#eff4ff",
+                    "on-surface-variant": "#3d4947",
+                    "on-tertiary-fixed-variant": "#005320",
+                    "background": "#f8f9ff",
+                    "outline-variant": "#bcc9c6",
+                    "outline": "#6d7a77",
+                    "on-primary-fixed-variant": "#005049",
+                    "on-primary-fixed": "#00201d",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-fixed": "#25005a",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-fixed-variant": "#5a00c6",
+                    "tertiary-container": "#00873a",
+                    "primary-fixed": "#89f5e7",
+                    "on-tertiary-fixed": "#002109",
+                    "tertiary-fixed": "#7ffc97",
+                    "inverse-on-surface": "#eaf1ff",
+                    "tertiary": "#006b2c",
+                    "secondary-container": "#8a4cfc",
+                    "on-primary": "#ffffff",
+                    "primary-container": "#008378",
+                    "secondary-fixed-dim": "#d2bbff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"],
+                    "mono": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-shift { background-color: #f8f9ff; }
+        .surface-to-surface-low { background-color: #eff4ff; }
+        .mono-data { font-family: 'JetBrains Mono', monospace; }
+        .glass-insight {
+            background: rgba(113, 42, 226, 0.05);
+            backdrop-filter: blur(12px);
+            border-left: 4px solid #712ae2;
+        }
+    </style>
+<link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body class="bg-background font-body text-on-background antialiased selection:bg-primary-fixed">
+<!-- TopNavBar Shell -->
+<header class="bg-[#f8f9ff] flex justify-between items-center w-full px-8 py-4 fixed top-0 z-50">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black tracking-tighter text-[#0b1c30]">PostureAI</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-['Inter'] font-medium tracking-tight text-[#0b1c30]/60 hover:text-[#00685f] transition-colors duration-200" href="#">Support</a>
+<a class="font-['Inter'] font-medium tracking-tight text-[#0b1c30]/60 hover:text-[#00685f] transition-colors duration-200" href="#">Documentation</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#00685f] cursor-pointer scale-95 duration-150">notifications</span>
+<span class="material-symbols-outlined text-[#00685f] cursor-pointer scale-95 duration-150">account_circle</span>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="bg-[#eff4ff] fixed left-0 top-0 h-screen w-64 flex flex-col py-8 gap-y-2 z-40">
+<div class="px-6 mb-8">
+<h2 class="text-[#0b1c30] font-black text-xl">Clinical Portal</h2>
+<p class="text-[#0b1c30]/60 text-xs uppercase tracking-widest font-bold">[Doctor Name]'s Dashboard</p>
+</div>
+<nav class="flex-grow flex flex-col gap-1">
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 hover:bg-white/30 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">dashboard</span> Home
+            </a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#00685f] font-black bg-white/50 rounded-l-full ml-4 pl-4 py-3 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">videocam</span> Live Monitor
+            </a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 hover:bg-white/30 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">insights</span> Insights
+            </a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 hover:bg-white/30 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">psychology</span> AI Advisor
+            </a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 hover:bg-white/30 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">history</span> Session History
+            </a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 pl-4 py-3 hover:bg-white/30 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+<div class="mt-auto px-4 flex flex-col gap-2">
+<button class="bg-[#00685f] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add_circle</span> Start New Session
+            </button>
+<div class="pt-4 border-t border-outline-variant/20 flex flex-col gap-1">
+<a class="font-['Inter'] text-xs uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 py-2 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm">help</span> Help Center
+                </a>
+<a class="font-['Inter'] text-xs uppercase tracking-widest font-bold text-[#0b1c30]/70 hover:text-[#00685f] ml-4 py-2 transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm">logout</span> Logout
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<!-- Connectivity Banner -->
+<div class="bg-primary px-8 py-3 flex items-center justify-between text-on-primary shadow-sm">
+<div class="flex items-center gap-4">
+<div class="relative flex h-3 w-3" id="ws-ping-dot">
+<span class="relative inline-flex rounded-full h-3 w-3 bg-outline"></span>
+</div>
+<span id="ws-status-text" class="font-medium tracking-tight text-on-primary/80">Real-time mode — Waiting for Device...</span>
+</div>
+<div class="flex items-center gap-4 text-sm mono-data">
+<input id="ws-url-input" type="text" value="ws://localhost:8765"
+  class="px-3 py-1 rounded-lg text-xs bg-white/10 border border-white/20 text-on-primary placeholder-white/50 focus:outline-none focus:bg-white/20 w-56"
+  placeholder="ws://host:port"/>
+<span id="ws-latency" class="opacity-80">Latency: -- ms</span>
+<span id="ws-msg-count" class="opacity-80">Msgs: 0</span>
+<button id="ws-toggle-btn"
+  class="ml-2 flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/25 border border-white/20 transition-all">
+  <span class="material-symbols-outlined text-sm" style="font-size:16px">power_settings_new</span>
+  <span id="ws-btn-label">Connect</span>
+</button>
+</div>
+</div>
+<!-- Three-Column Layout -->
+<div class="p-8 grid grid-cols-12 gap-8 items-start">
+<!-- Left Column: Primary Posture Feedback -->
+<section class="col-span-12 lg:col-span-4 space-y-8">
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0_20px_40px_rgba(11,28,48,0.05)]">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="text-xs uppercase tracking-widest font-bold text-outline mb-1">Current State</p>
+<h1 id="posture-heading" class="text-[48px] font-black text-tertiary leading-none flex items-center gap-2">
+                                <span id="posture-label">--</span> <span id="posture-icon" class="material-symbols-outlined text-4xl">help</span>
+</h1>
+</div>
+<div class="text-right">
+<p class="text-xs uppercase tracking-widest font-bold text-outline mb-1">Time Active</p>
+<p id="time-active" class="mono-data text-2xl font-bold text-on-background">--:--:--</p>
+</div>
+</div>
+<div class="space-y-2 mb-8">
+<div class="flex justify-between items-center text-sm font-medium">
+<span>Confidence Score</span>
+<span id="confidence-pct" class="text-primary">--%</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div id="confidence-bar" class="h-full bg-primary transition-all duration-500" style="width:0%"></div>
+</div>
+</div>
+<!-- Cushion Diagram -->
+<div class="relative bg-surface-container-low rounded-2xl p-6 mb-8">
+<p class="text-[10px] uppercase tracking-[0.2em] font-black text-outline text-center mb-6">Pressure Map (FSR)</p>
+<div class="grid grid-cols-3 gap-2 aspect-square max-w-[260px] mx-auto">
+<div id="cell-fl" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">FL</span>
+<span id="fsr-fl" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-fm" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">FM</span>
+<span id="fsr-fm" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-fr" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">FR</span>
+<span id="fsr-fr" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-ml" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">ML</span>
+<span id="fsr-ml" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-mm" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">MM</span>
+<span id="fsr-mm" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-mr" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">MR</span>
+<span id="fsr-mr" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-bl" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">BL</span>
+<span id="fsr-bl" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-bm" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">BM</span>
+<span id="fsr-bm" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+<div id="cell-br" class="bg-white rounded-lg flex flex-col items-center justify-center border-b-2 border-primary/20 shadow-sm transition-colors py-2">
+<span class="text-[9px] font-bold text-outline">BR</span>
+<span id="fsr-br" class="mono-data text-sm font-black text-on-surface">--</span>
+</div>
+</div>
+</div>
+<!-- Status Badges -->
+<div class="flex justify-between gap-2">
+<div class="flex-1 bg-surface-container-low py-3 rounded-xl flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">thermostat</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Temp</span>
+<span id="temp-val" class="mono-data text-sm font-bold">--°C</span>
+</div>
+<div class="flex-1 bg-surface-container-low py-3 rounded-xl flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">person</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Person</span>
+<span id="person-val" class="mono-data text-sm font-bold">--</span>
+</div>
+<div class="flex-1 bg-surface-container-low py-3 rounded-xl flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">settings_input_component</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Motor</span>
+<span id="motor-val" class="mono-data text-sm font-bold">--</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Middle Column: Sensor Readings & Detailed Analytics -->
+<section class="col-span-12 lg:col-span-5 space-y-8">
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0_20px_40px_rgba(11,28,48,0.05)]">
+<h3 class="text-xl font-black mb-8">Sensor readings</h3>
+<div class="grid grid-cols-2 gap-8 mb-12">
+<!-- Front Left Gauge -->
+<div class="space-y-3">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-outline">
+<span>Front Left</span>
+<span id="gauge-fl-pct" class="mono-data">--%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-surface-container-low">
+<div id="gauge-fl-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-300" style="width:0%"></div>
+</div>
+</div>
+</div>
+<!-- Front Right Gauge -->
+<div class="space-y-3">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-outline">
+<span>Front Right</span>
+<span id="gauge-fr-pct" class="mono-data">--%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-surface-container-low">
+<div id="gauge-fr-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-300" style="width:0%"></div>
+</div>
+</div>
+</div>
+<!-- Back Left Gauge -->
+<div class="space-y-3">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-outline">
+<span>Back Left</span>
+<span id="gauge-bl-pct" class="mono-data">--%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-surface-container-low">
+<div id="gauge-bl-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-300" style="width:0%"></div>
+</div>
+</div>
+</div>
+<!-- Back Right Gauge -->
+<div class="space-y-3">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-outline">
+<span>Back Right</span>
+<span id="gauge-br-pct" class="mono-data">--%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-surface-container-low">
+<div id="gauge-br-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-300" style="width:0%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface p-6 rounded-2xl">
+<div class="flex items-center gap-4 mb-4">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">data_object</span>
+</div>
+<div>
+<h4 class="font-bold">WebSocket Status</h4>
+<p class="text-xs text-outline tracking-tight">Active stream: raw_pressure_events</p>
+</div>
+</div>
+<pre id="raw-json" class="mono-data text-[11px] bg-on-surface text-surface-container-lowest p-4 rounded-lg overflow-auto max-h-48 whitespace-pre-wrap">Waiting for data…</pre>
+</div>
+</div>
+</section>
+<!-- Right Column: Alerts & Quick Tips -->
+<section class="col-span-12 lg:col-span-3 space-y-8">
+<!-- Alerts Card -->
+<div id="alerts-card" class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0_20px_40px_rgba(11,28,48,0.05)] border-l-4 border-outline">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm uppercase tracking-widest font-black">Alerts</h3>
+<span id="alerts-status" class="text-[10px] font-bold text-outline px-2 py-1 bg-outline/10 rounded-full">Waiting for Data</span>
+</div>
+<div id="alerts-list" class="space-y-4 max-h-80 overflow-y-auto">
+<div class="flex gap-4 items-start opacity-60">
+<div class="mt-1 h-6 w-6 rounded-full bg-outline/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xs text-outline">hourglass_empty</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">No alerts yet</p>
+<p class="text-xs text-outline mt-1 leading-relaxed">Connect to a Device to start receiving posture alerts.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Tip Card -->
+<div class="p-6 rounded-3xl opacity-70" style="border-left: 4px solid #6d7a77; background: rgba(109, 122, 119, 0.05); backdrop-filter: blur(12px);">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-outline">psychology</span>
+<h3 class="text-sm font-black text-outline uppercase tracking-widest">Quick tip</h3>
+</div>
+<p class="text-sm text-outline leading-relaxed">
+                        Waiting for session data to generate AI insights and recommendations.
+                    </p>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant/10 flex justify-around items-center py-4 px-2 z-50">
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary font-black scale-110">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Monitor</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-outline">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Data</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-outline">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Profile</span>
+</div>
+</nav>
+
+
+
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/live-monitor.js" defer></script>
+</body>
+
