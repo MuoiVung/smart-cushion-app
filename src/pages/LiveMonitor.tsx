@@ -123,32 +123,22 @@ export const LiveMonitor: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 text-sm font-mono">
-          <input
-            type="text"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            disabled={status === 'connected' || status === 'connecting'}
-            className="px-3 py-1 rounded-lg text-xs bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:bg-white/20 w-60"
-            placeholder="ws://192.168.x.x:8765"
-            id="fog-ws-url"
-          />
-          <button
-            onClick={handleDiscover}
-            disabled={status === 'connected' || status === 'connecting'}
-            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/25 border border-white/20 transition-all"
-            title="Auto-discover Fog Node"
-          >
-            <span className="material-symbols-outlined text-sm">search</span>
-          </button>
           <span className="opacity-70 hidden sm:inline">Latency: {latency} ms</span>
           <span className="opacity-70 hidden sm:inline">Msgs: {msgCount}</span>
           <button
             id="btn-toggle-connection"
-            onClick={status === 'connected' ? disconnect : connect}
-            className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/25 border border-white/20 transition-all"
+            onClick={status === 'connected' ? disconnect : handleDiscover}
+            className={cn(
+              "flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-bold transition-all border",
+              status === 'connected' 
+                ? "bg-red-500/20 hover:bg-red-500/40 border-red-500/50 text-red-200" 
+                : "bg-emerald-500/20 hover:bg-emerald-500/40 border-emerald-500/50 text-emerald-200"
+            )}
           >
-            <span className="material-symbols-outlined text-sm">power_settings_new</span>
-            <span>{status === 'connected' ? 'Disconnect' : 'Connect'}</span>
+            <span className="material-symbols-outlined text-sm">
+              {status === 'connected' ? 'power_off' : 'rocket_launch'}
+            </span>
+            <span>{status === 'connected' ? 'Disconnect' : 'Connect to Cushion'}</span>
           </button>
         </div>
       </div>
