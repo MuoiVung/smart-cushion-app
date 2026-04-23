@@ -2,12 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { LiveMonitor } from './pages/LiveMonitor';
-
-// Stub components for other pages
-const Insights = () => <div className="p-12">Insights Page (Porting in progress...)</div>;
-const AIAdvisor = () => <div className="p-12">AI Advisor Page (Porting in progress...)</div>;
-const SessionHistory = () => <div className="p-12">Session History Page (Porting in progress...)</div>;
-const Settings = () => <div className="p-12">Settings Page (Porting in progress...)</div>;
+import { Insights } from './pages/Insights';
+import { AIAdvisor } from './pages/AIAdvisor';
+import { SessionHistory } from './pages/SessionHistory';
+import { Settings } from './pages/Settings';
 
 function App() {
   return (
