@@ -115,8 +115,8 @@ export const LiveMonitor: React.FC = () => {
             status === 'error'      ? 'bg-red-400'                    : 'bg-white/30'
           )} />
           <span className="text-sm font-medium text-white/90">
-            {status === 'connected'  ? `Connected — ${url}` :
-             status === 'connecting' ? `Connecting to ${url}…` :
+            {status === 'connected'  ? 'Connected to Smart Cushion' :
+             status === 'connecting' ? 'Connecting to Fog Node...' :
              status === 'error'      ? (error ?? 'Connection error') : 'Real-time Monitor — Not connected'}
           </span>
         </div>
