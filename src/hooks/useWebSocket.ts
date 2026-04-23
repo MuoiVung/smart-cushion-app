@@ -117,10 +117,6 @@ export const useWebSocket = (defaultUrl?: string) => {
 
   // ── Disconnect ───────────────────────────────────────────────────────────
   const disconnect = useCallback(() => {
-    if (reconnectTimer.current) {
-      clearTimeout(reconnectTimer.current);
-      reconnectTimer.current = null;
-    }
     ws.current?.close(1000, 'User disconnected');
     ws.current = null;
     setStatus('disconnected');
@@ -185,7 +181,6 @@ export const useWebSocket = (defaultUrl?: string) => {
   useEffect(() => {
     return () => {
       if (ws.current) ws.current.close();
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
     };
   }, []);
 
