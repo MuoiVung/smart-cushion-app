@@ -1,7 +1,7 @@
 (() => {
     const FSR_MAX = 4095;
     const TEMP_MIN = 15, TEMP_MAX = 45;
-    const STORAGE_KEY = "fogNodeUrl";
+    const STORAGE_KEY = "deviceUrl";
     const SESSIONS_KEY = "posture_sessions";
     const MAX_STORED_SESSIONS = 30;
     const MIN_MESSAGES_TO_SAVE = 10;
@@ -135,7 +135,7 @@
         ws.onmessage = (e) => handleMessage(e.data);
 
         ws.onerror = () => {
-            setStatus("error", "Connection error — check fog node URL");
+            setStatus("error", "Connection error — check device URL");
         };
 
         ws.onclose = (ev) => {
@@ -159,7 +159,7 @@
         try { data = JSON.parse(raw); } catch { return; }
 
         if (data.type === "connected") {
-            setStatus("connected", `Connected — ${data.message || "Fog Node ready"}`);
+            setStatus("connected", `Connected — ${data.message || "Device ready"}`);
             return;
         }
 
