@@ -153,20 +153,22 @@ export const useWebSocket = (defaultUrl?: string) => {
       }
 
       // 3. Smart URL Selection
-      // If we are on the same network, we try localhost first (most reliable),
-      // then fall back to the discovered LAN IP.
-      let targetIp = data.local_ip;
+      let localWsUrl = "";
       
-      // If same network, localhost is usually safer for the browser
-      if (isSameNetwork && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-        targetIp = 'localhost';
+      if (data.local_ip.startsWith('ws://') || data.local_ip.startsWith('wss://')) {
+        // If Firebase already provides a full URL (like Ngrok), use it directly
+        localWsUrl = data.local_ip;
+      } else {
+        // If it's just an IP, we prioritize localhost if on same machine
+        let targetIp = data.local_ip;
+        if (isSameNetwork && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+          targetIp = 'localhost';
+        }
+        localWsUrl = `ws://${targetIp}:8765`;
       }
 
-      const localWsUrl = `ws://${targetIp}:8765`;
       console.log('Discovery: Connecting to:', localWsUrl);
       setUrl(localWsUrl);
-      
-      // Return the URL so the caller can use it
       return localWsUrl;
 
     } catch (err: any) {
