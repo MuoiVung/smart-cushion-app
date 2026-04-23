@@ -43,18 +43,14 @@ export const useWebSocket = (defaultUrl?: string) => {
 
   const ws          = useRef<WebSocket | null>(null);
   const lastMsgTs   = useRef<number>(0);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Connect ──────────────────────────────────────────────────────────────
   const connect = useCallback(() => {
     if (ws.current?.readyState === WebSocket.OPEN)  return;
     if (ws.current?.readyState === WebSocket.CONNECTING) return;
 
-    // Cancel any pending auto-reconnect
-    if (reconnectTimer.current) {
-      clearTimeout(reconnectTimer.current);
-      reconnectTimer.current = null;
-    }
+    if (ws.current?.readyState === WebSocket.OPEN)  return;
+    if (ws.current?.readyState === WebSocket.CONNECTING) return;
 
     setStatus('connecting');
     setError(null);
