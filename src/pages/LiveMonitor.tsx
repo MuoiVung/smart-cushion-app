@@ -98,8 +98,7 @@ export const LiveMonitor: React.FC = () => {
   const handleDiscover = async () => {
     const discoveredUrl = await discover();
     if (discoveredUrl) {
-      // Small delay to ensure state URL is updated
-      setTimeout(() => connect(), 100);
+      connect(discoveredUrl);
     }
   };
 

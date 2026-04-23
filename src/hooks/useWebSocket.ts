@@ -45,19 +45,22 @@ export const useWebSocket = (defaultUrl?: string) => {
   const lastMsgTs   = useRef<number>(0);
 
   // ── Connect ──────────────────────────────────────────────────────────────
-  const connect = useCallback(() => {
-    if (ws.current?.readyState === WebSocket.OPEN)  return;
-    if (ws.current?.readyState === WebSocket.CONNECTING) return;
+  const connect = useCallback((overrideUrl?: string) => {
+    const targetUrl = overrideUrl || url;
+    if (!targetUrl) {
+      setError("No connection URL available. Please try searching first.");
+      return;
+    }
 
     if (ws.current?.readyState === WebSocket.OPEN)  return;
     if (ws.current?.readyState === WebSocket.CONNECTING) return;
 
     setStatus('connecting');
     setError(null);
-    localStorage.setItem('fogWsUrl', url);
+    localStorage.setItem('fogWsUrl', targetUrl);
 
     try {
-      const socket = new WebSocket(url);
+      const socket = new WebSocket(targetUrl);
 
       socket.onopen = () => {
         setStatus('connected');
