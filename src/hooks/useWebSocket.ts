@@ -173,11 +173,11 @@ export const useWebSocket = (defaultUrl?: string) => {
 
     } catch (err: any) {
       if (err.message === 'No Fog Node found on Cloud') {
-        setError('No Cushion detected. Please ensure the Fog Launcher is running and Start Services is pressed.');
+        setError('Smart Cushion not detected. Please ensure the Fog Launcher is running and Start Services is pressed.');
       } else if (err.message.includes('Failed to fetch')) {
-        setError('Connection to Cloud failed. Please check your internet connection.');
+        setError('Cannot reach Smart Cushion. Please check your internet connection or Fog Node status.');
       } else {
-        setError(`Cushion not found. If using local connection, ensure you are on the same Wi-Fi.`);
+        setError('Smart Cushion connection failed. If using local connection, ensure you are on the same Wi-Fi.');
       }
       setStatus('error');
       return null;
