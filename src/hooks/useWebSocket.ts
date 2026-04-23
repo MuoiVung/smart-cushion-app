@@ -31,7 +31,7 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 // useWebSocket hook
 // ---------------------------------------------------------------------------
 
-const DEFAULT_WS_URL = 'ws://localhost:8765';
+const DEFAULT_WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8765';
 
 export const useWebSocket = (defaultUrl?: string) => {
   const [url, setUrl] = useState<string>(
