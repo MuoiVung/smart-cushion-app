@@ -130,6 +130,60 @@ export const useWebSocket = (defaultUrl?: string) => {
     setError(null);
   }, []);
 
+  // ── Discovery ────────────────────────────────────────────────────────────
+  const discover = useCallback(async () => {
+    const firebaseBaseUrl = import.meta.env.VITE_FIREBASE_DISCOVERY_URL;
+    if (!firebaseBaseUrl) {
+      setError('Firebase Discovery URL not configured');
+      return;
+    }
+
+    setStatus('connecting'); // Show scanning state
+    setError(null);
+
+    try {
+      // 1. Fetch metadata from Firebase
+      const response = await fetch(`${firebaseBaseUrl.replace(/\/$/, '')}/devices/cushion-01.json`);
+      if (!response.ok) throw new Error('Failed to fetch from Firebase');
+      
+      const data = await response.json();
+      if (!data || !data.local_ip) throw new Error('No Fog Node found on Cloud');
+
+      // 2. Fetch our own public IP to see if we are in the same network
+      let isSameNetwork = false;
+      try {
+        const myIpRes = await fetch('https://api.ipify.org?format=json');
+        const myIpData = await myIpRes.json();
+        isSameNetwork = (data.public_ip === myIpData.ip);
+      } catch (e) {
+        console.warn('Discovery: Could not verify public IP, assuming local.');
+      }
+
+      // 3. Smart URL Selection
+      // If we are on the same network, we try localhost first (most reliable),
+      // then fall back to the discovered LAN IP.
+      let targetIp = data.local_ip;
+      
+      // If same network, localhost is usually safer for the browser
+      if (isSameNetwork && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        targetIp = 'localhost';
+      }
+
+      const localWsUrl = `ws://${targetIp}:8765`;
+      console.log('Discovery: Connecting to:', localWsUrl);
+      setUrl(localWsUrl);
+      
+      // Return the URL so the caller can use it
+      return localWsUrl;
+
+    } catch (err: any) {
+      setError(`Discovery failed: ${err.message}`);
+      setStatus('error');
+      return null;
+    }
+  }, [setUrl]);
+
+
   // ── Cleanup on unmount ────────────────────────────────────────────────────
   useEffect(() => {
     return () => {
@@ -148,5 +202,6 @@ export const useWebSocket = (defaultUrl?: string) => {
     error,
     connect,
     disconnect,
+    discover,
   };
 };

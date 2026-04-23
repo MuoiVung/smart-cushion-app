@@ -74,7 +74,7 @@ const ALERT_STATUS_COLOR: Record<string, string> = {
 // Component
 // ---------------------------------------------------------------------------
 export const LiveMonitor: React.FC = () => {
-  const { url, setUrl, status, lastMessage, msgCount, latency, error, connect, disconnect } = useWebSocket();
+  const { url, setUrl, status, lastMessage, msgCount, latency, error, connect, disconnect, discover } = useWebSocket();
 
   const [alertLog, setAlertLog] = useState<{ posture: string; time: string; id: number }[]>([]);
 
@@ -94,6 +94,14 @@ export const LiveMonitor: React.FC = () => {
   const occupancy = lastMessage?.occupancy_state ?? 'empty';
   const occupancyBadge = OCCUPANCY_BADGE[occupancy];
   const alertStatus = lastMessage?.alert_status ?? 'IDLE';
+
+  const handleDiscover = async () => {
+    const discoveredUrl = await discover();
+    if (discoveredUrl) {
+      // Small delay to ensure state URL is updated
+      setTimeout(() => connect(), 100);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-container-lowest">
@@ -124,6 +132,14 @@ export const LiveMonitor: React.FC = () => {
             placeholder="ws://192.168.x.x:8765"
             id="fog-ws-url"
           />
+          <button
+            onClick={handleDiscover}
+            disabled={status === 'connected' || status === 'connecting'}
+            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/25 border border-white/20 transition-all"
+            title="Auto-discover Fog Node"
+          >
+            <span className="material-symbols-outlined text-sm">search</span>
+          </button>
           <span className="opacity-70 hidden sm:inline">Latency: {latency} ms</span>
           <span className="opacity-70 hidden sm:inline">Msgs: {msgCount}</span>
           <button
