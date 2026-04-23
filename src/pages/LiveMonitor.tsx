@@ -74,7 +74,7 @@ const ALERT_STATUS_COLOR: Record<string, string> = {
 // Component
 // ---------------------------------------------------------------------------
 export const LiveMonitor: React.FC = () => {
-  const { url, setUrl, status, lastMessage, msgCount, latency, error, connect, disconnect, discover } = useWebSocket();
+  const { url, status, lastMessage, msgCount, latency, error, connect, disconnect, discover } = useWebSocket();
 
   const [alertLog, setAlertLog] = useState<{ posture: string; time: string; id: number }[]>([]);
 
