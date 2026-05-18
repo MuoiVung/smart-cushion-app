@@ -47,52 +47,47 @@ export const LoginPage: React.FC = () => {
     navigate('/');
   };
 
-  const handleLegacyDemo = () => {
-    login('Legacy Demo', 'user', 0, [], 0);
-    navigate('/legacy-demo');
-  };
-
   return (
-    <div className="min-h-screen bg-legacy-bg flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden font-sans">
-      {/* Professional subtle backdrop */}
-      <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-legacy-primary/5 rounded-full blur-[100px]" />
-      <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-legacy-surface-low rounded-full blur-[80px]" />
+    <div className="min-h-screen bg-capy-bg flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Decorative blobs */}
+      <div className="absolute top-[-10%] left-[-5%] w-96 h-96 bg-capy-amber/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-capy-success/10 rounded-full blur-3xl animate-pulse" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full z-10"
       >
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-legacy-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg rotate-3 transition-transform hover:rotate-0 cursor-default">
-            <span className="material-symbols-outlined text-white text-4xl">align_items_stretch</span>
+        <div className="text-center mb-8">
+          <div className="w-28 h-28 bg-capy-brown rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl p-2 overflow-hidden border-4 border-white/10">
+            <TransparentImage src="/assets/capybara/postures/nup.png" alt="Capy Logo" className="w-full h-full object-contain brightness-110" />
           </div>
-          <h1 className="text-4xl font-black text-legacy-on-surface tracking-tighter">PostureAI</h1>
-          <p className="text-legacy-on-surface/50 font-medium mt-2">Clinical Grade Spinal Monitoring</p>
+          <h1 className="text-4xl font-black text-capy-brown-3 tracking-tighter">Capy Login</h1>
+          <p className="text-capy-muted font-medium mt-2 italic">Connect with your Smart Cushion</p>
         </div>
 
-        <div className="bg-white border border-legacy-on-surface/5 rounded-[2.5rem] p-10 shadow-2xl shadow-legacy-primary/10">
-          <form onSubmit={handleLogin} className="space-y-6">
+        <div className="bg-capy-card border border-capy-border rounded-[2.5rem] p-8 shadow-2xl shadow-capy-brown/5">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-legacy-on-surface/40 mb-3 ml-1">Username</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-capy-muted mb-2 ml-1">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="smartcushion"
-                className="w-full bg-legacy-bg border-0 rounded-2xl px-6 py-4 text-legacy-on-surface focus:ring-2 focus:ring-legacy-primary/20 transition-all placeholder:text-legacy-on-surface/20"
+                className="w-full bg-capy-bg border border-capy-border rounded-2xl px-5 py-4 text-capy-text focus:outline-none focus:ring-2 focus:ring-capy-amber/50 transition-all placeholder:opacity-30"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-legacy-on-surface/40 mb-3 ml-1">Password</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-capy-muted mb-2 ml-1">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-legacy-bg border-0 rounded-2xl px-6 py-4 text-legacy-on-surface focus:ring-2 focus:ring-legacy-primary/20 transition-all placeholder:text-legacy-on-surface/20"
+                className="w-full bg-capy-bg border border-capy-border rounded-2xl px-5 py-4 text-capy-text focus:outline-none focus:ring-2 focus:ring-capy-amber/50 transition-all placeholder:opacity-30"
                 required
               />
             </div>
@@ -101,7 +96,7 @@ export const LoginPage: React.FC = () => {
               <motion.p 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-error text-xs font-bold text-center bg-error/5 py-3 rounded-xl border border-error/10"
+                className="text-capy-danger text-xs font-bold text-center bg-capy-danger/5 py-2 rounded-lg border border-capy-danger/10"
               >
                 ⚠ {error}
               </motion.p>
@@ -110,24 +105,25 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-legacy-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-legacy-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+              className="w-full bg-capy-brown text-white font-black py-4 rounded-2xl shadow-lg shadow-capy-brown/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
             >
-              {loading ? 'Authenticating...' : 'Access Portal'}
+              {loading ? 'Verifying...' : 'Login to Dashboard'}
             </button>
           </form>
 
-          <div className="mt-10 pt-10 border-t border-legacy-on-surface/5 space-y-4">
+          <div className="mt-8 flex flex-col items-center">
+            <div className="w-full flex items-center gap-4 mb-6">
+              <div className="h-px bg-capy-border flex-1" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-capy-muted">Or try as Guest</span>
+              <div className="h-px bg-capy-border flex-1" />
+            </div>
+
             <button
               onClick={handleDemo}
-              className="w-full py-4 bg-legacy-bg text-legacy-on-surface font-bold rounded-2xl hover:bg-legacy-surface-container transition-colors text-sm"
+              className="group flex items-center gap-2 text-sm font-bold text-capy-brown hover:text-capy-amber transition-colors"
             >
-              Open V2 Dashboard (Modern)
-            </button>
-            <button
-              onClick={handleLegacyDemo}
-              className="w-full py-4 border-2 border-legacy-primary/20 text-legacy-primary font-bold rounded-2xl hover:bg-legacy-primary/5 transition-colors text-sm"
-            >
-              View Legacy Demo (Classic)
+              <span className="bg-capy-amber-soft p-1.5 rounded-lg group-hover:bg-capy-amber/20 transition-colors text-base">🎮</span>
+              Demo User (View Only)
             </button>
           </div>
         </div>
