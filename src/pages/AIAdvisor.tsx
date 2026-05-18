@@ -237,11 +237,11 @@ export const AIAdvisor: React.FC = () => {
           </div>
           <div className="md:col-span-4 bg-secondary/5 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-secondary/10 flex flex-row md:flex-col justify-between items-center md:items-start shadow-sm">
             <div>
-              <span className="material-symbols-outlined text-secondary mb-2 md:mb-4 text-2xl md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+              <span className="material-symbols-outlined text-tertiary mb-2 md:mb-4 text-2xl md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
               <h4 className="font-bold text-sm md:text-base text-on-surface mb-1">Posture Score</h4>
               <p className="hidden md:block text-xs text-on-surface/60 leading-relaxed">Better than last session.</p>
             </div>
-            <div className="text-3xl md:text-4xl font-black text-secondary tracking-tighter">
+            <div className="text-3xl md:text-4xl font-black text-tertiary tracking-tighter">
               84<span className="text-xs md:text-sm font-normal text-on-surface/40 ml-1">/100</span>
             </div>
           </div>

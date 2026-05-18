@@ -1,17 +1,61 @@
-import React from 'react';
-
-const stats = [
-  { label: 'Total Sitting Time', value: '5.2h', sub: 'DAILY', color: 'text-on-surface' },
-  { label: 'Poor Posture Time', value: '28m', sub: '', color: 'text-tertiary' },
-  { label: 'Alert Count', value: '12', sub: '', color: 'text-error' },
-  { label: 'Posture Score', value: '84%', sub: 'KEEP IT UP', color: 'text-tertiary', emoji: '🎉🦫' },
-];
-
-
+import React, { useMemo, useState } from 'react';
 
 export const Dashboard: React.FC = () => {
-  const thisWeekScores = [65, 70, 72, 78, 80, 82, 84];
-  const lastWeekScores = [60, 62, 65, 68, 70, 75, 78];
+  // We use state to allow manual refreshing of the mockup if desired, but it will also pick a random one on mount.
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const scenario = useMemo(() => {
+    const scenarios = [
+      {
+        score: '32%',
+        sub: 'NEEDS WORK',
+        color: 'text-error',
+        emoji: '⚠️',
+        thisWeek: [40, 35, 30, 25, 30, 35, 32],
+        lastWeek: [50, 45, 40, 35, 40, 45, 50],
+        totalSitting: '6.5h',
+        poorPosture: '4.4h',
+        alertCount: '45',
+        advisor: '"We noticed you were slouching forward frequently today. Try to keep your screen at eye level to prevent neck strain."'
+      },
+      {
+        score: '65%',
+        sub: 'IMPROVING',
+        color: 'text-secondary',
+        emoji: '📈',
+        thisWeek: [55, 60, 58, 62, 65, 68, 65],
+        lastWeek: [40, 45, 50, 55, 60, 55, 50],
+        totalSitting: '5.8h',
+        poorPosture: '2.0h',
+        alertCount: '23',
+        advisor: '"You are making good progress! Try taking short breaks every 45 minutes to stand up and stretch."'
+      },
+      {
+        score: '84%',
+        sub: 'KEEP IT UP',
+        color: 'text-tertiary',
+        emoji: '🎉🦫',
+        thisWeek: [65, 70, 72, 78, 80, 82, 84],
+        lastWeek: [60, 62, 65, 68, 70, 75, 78],
+        totalSitting: '5.2h',
+        poorPosture: '28m',
+        alertCount: '0',
+        advisor: '"We noticed a slight right-leaning tendency during your last 2 sessions. Try adjusting your monitor 5cm to the left."'
+      }
+    ];
+    // Randomly pick a scenario
+    return scenarios[Math.floor(Math.random() * scenarios.length)];
+  }, [refreshKey]);
+
+  const stats = [
+    { label: 'Total Sitting Time', value: scenario.totalSitting, sub: 'DAILY', color: 'text-on-surface' },
+    { label: 'Poor Posture Time', value: scenario.poorPosture, sub: '', color: scenario.color }, // Match poor posture color to the score tier
+    { label: 'Alert Count', value: scenario.alertCount, sub: '', color: Number(scenario.alertCount) > 0 ? 'text-error' : 'text-[#10b981]' },
+    { label: 'Posture Score', value: scenario.score, sub: scenario.sub, color: scenario.color, emoji: scenario.emoji },
+  ];
+
+  const thisWeekScores = scenario.thisWeek;
+  const lastWeekScores = scenario.lastWeek;
 
   const thisWeekAvg = thisWeekScores.reduce((a, b) => a + b, 0) / thisWeekScores.length;
   const lastWeekAvg = lastWeekScores.reduce((a, b) => a + b, 0) / lastWeekScores.length;
@@ -134,7 +178,7 @@ export const Dashboard: React.FC = () => {
                 <h4 className="font-bold text-on-surface text-sm md:text-base">AI Advisor</h4>
               </div>
               <p className="text-[11px] md:text-sm text-on-surface/60 leading-relaxed italic">
-                "We noticed a slight right-leaning tendency during your last 2 sessions. Try adjusting your monitor 5cm to the left."
+                {scenario.advisor}
               </p>
             </div>
           </div>

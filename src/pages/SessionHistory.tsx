@@ -35,7 +35,7 @@ function goodPct(s: SessionRecord): number {
 }
 
 function getScoreDetails(score: number) {
-  if (score < 50) return { label: 'Needs Work', color: 'error', icon: null };
+  if (score <= 50) return { label: 'Needs Work', color: 'error', icon: null };
   if (score < 80) return { label: 'Improving', color: 'secondary', icon: 'trending_up' };
   return { label: 'Keep It Up', color: 'tertiary', icon: null };
 }
@@ -332,7 +332,7 @@ export const SessionHistory: React.FC = () => {
                           <div className="flex items-center gap-2 md:gap-3">
                             <span className={`font-mono font-bold text-${color}`}>{score}%</span>
                             <span className="text-lg md:text-xl">
-                              {score >= 80 ? '✨🦫' : score >= 50 ? '🌱🦫' : '🏋️🦫'}
+                              {score >= 80 ? '✨🦫' : score > 50 ? '🌱🦫' : '🏋️🦫'}
                             </span>
                           </div>
                         </td>
