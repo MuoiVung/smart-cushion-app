@@ -7,17 +7,13 @@ import { useWebSocket, type PostureLabel } from '../hooks/useWebSocket';
 // Posture metadata
 // ---------------------------------------------------------------------------
 const POSTURE_LABELS: Record<PostureLabel, string> = {
-  NUP:    'Natural Upright',
-  LF:     'Leaning Forward',
-  LB:     'Leaning Backward',
-  LFSR:   'Lean Fwd – Right',
-  LFSL:   'Lean Fwd – Left',
-  CRL:    'Cross-Leg (Right)',
-  CLL:    'Cross-Leg (Left)',
-  CRLL:   'Cross-Leg Deep (Right)',
-  CLLL:   'Cross-Leg Deep (Left)',
-  EMPTY:  'No Person',
-  OBJECT: 'Object Detected',
+  UPRIGHT:  'Sitting Upright',
+  FORWARD:  'Leaning Forward',
+  BACKWARD: 'Leaning Backward',
+  RIGHT:    'Leaning Right',
+  LEFT:     'Leaning Left',
+  EMPTY:    'No Person',
+  OBJECT:   'Object Detected',
 };
 
 interface Sensors { FL: number; FM: number; FR: number; ML: number; MM: number; MR: number; BL: number; BM: number; BR: number; }
@@ -72,67 +68,39 @@ export const LiveMonitor: React.FC = () => {
   // ---- Visual mapping for the capybara cushion (Driven by AI Posture Labels) ----
   const view = useMemo(() => {
     switch (posture) {
-      case 'NUP':
+      case 'UPRIGHT':
         return {
           tint: 'from-emerald-500/15 to-emerald-500/25',
-          alertTitle: <>Natural Upright Posture <span className="text-emerald-500">✦</span></>,
+          alertTitle: <>Sitting Upright <span className="text-emerald-500">✦</span></>,
           aiMessage: "Perfect posture! Keep it up.",
           mood: 'good' as const,
         };
-      case 'LF':
+      case 'FORWARD':
         return {
           tint: 'from-amber-500/15 to-amber-500/25',
-          alertTitle: <>Lean Forward <span className="text-amber-500">⚠</span></>,
+          alertTitle: <>Leaning Forward <span className="text-amber-500">⚠</span></>,
           aiMessage: "Try to sit back and align your spine.",
           mood: 'bad' as const,
         };
-      case 'LB':
+      case 'BACKWARD':
         return {
           tint: 'from-amber-500/15 to-amber-500/25',
-          alertTitle: <>Lean Backward <span className="text-amber-500">⚠</span></>,
+          alertTitle: <>Leaning Backward <span className="text-amber-500">⚠</span></>,
           aiMessage: "Shift slightly forward for better balance.",
           mood: 'bad' as const,
         };
-      case 'LFSR':
+      case 'RIGHT':
         return {
           tint: 'from-orange-500/15 to-orange-500/25',
-          alertTitle: <>Lean Forward Support Right <span className="text-orange-500">→</span></>,
+          alertTitle: <>Leaning Right <span className="text-orange-500">→</span></>,
           aiMessage: "You're leaning right. Center your weight.",
           mood: 'bad' as const,
         };
-      case 'LFSL':
+      case 'LEFT':
         return {
           tint: 'from-orange-500/15 to-orange-500/25',
-          alertTitle: <>Lean Forward Support Left <span className="text-orange-500">←</span></>,
+          alertTitle: <>Leaning Left <span className="text-orange-500">←</span></>,
           aiMessage: "You're leaning left. Center your weight.",
-          mood: 'bad' as const,
-        };
-      case 'CRL':
-        return {
-          tint: 'from-rose-500/15 to-rose-500/25',
-          alertTitle: <>Cross-Right Legged <span className="text-rose-500">✘</span></>,
-          aiMessage: "Uncross your legs for better blood flow.",
-          mood: 'bad' as const,
-        };
-      case 'CLL':
-        return {
-          tint: 'from-rose-500/15 to-rose-500/25',
-          alertTitle: <>Cross-Left Legged <span className="text-rose-500">✘</span></>,
-          aiMessage: "Uncross your legs for better blood flow.",
-          mood: 'bad' as const,
-        };
-      case 'CRLL':
-        return {
-          tint: 'from-red-600/15 to-red-600/25',
-          alertTitle: <>Cross-Right Legged Deep <span className="text-red-600">⚠</span></>,
-          aiMessage: "Avoid leaning while your legs are crossed.",
-          mood: 'bad' as const,
-        };
-      case 'CLLL':
-        return {
-          tint: 'from-red-600/15 to-red-600/25',
-          alertTitle: <>Cross-Left Legged Deep <span className="text-red-600">⚠</span></>,
-          aiMessage: "Avoid leaning while your legs are crossed.",
           mood: 'bad' as const,
         };
       case 'EMPTY':
@@ -264,15 +232,11 @@ export const LiveMonitor: React.FC = () => {
                   >
                     <TransparentImage
                       src={
-                        posture === 'NUP'  ? '/assets/capybara/postures/nup.png' :
-                        posture === 'LF'   ? '/assets/capybara/postures/lf.png' :
-                        posture === 'LB'   ? '/assets/capybara/postures/lb.png' :
-                        posture === 'LFSR' ? '/assets/capybara/postures/lfsr.png' :
-                        posture === 'LFSL' ? '/assets/capybara/postures/lfsl.png' :
-                        posture === 'CRL'  ? '/assets/capybara/postures/crl.png' :
-                        posture === 'CLL'  ? '/assets/capybara/postures/cll.png' :
-                        posture === 'CRLL' ? '/assets/capybara/postures/crll.png' : 
-                        posture === 'CLLL' ? '/assets/capybara/postures/clll.png' : 
+                        posture === 'UPRIGHT'  ? '/assets/capybara/postures/nup.png' :
+                        posture === 'FORWARD'  ? '/assets/capybara/postures/lf.png' :
+                        posture === 'BACKWARD' ? '/assets/capybara/postures/lb.png' :
+                        posture === 'RIGHT'    ? '/assets/capybara/postures/lfsr.png' :
+                        posture === 'LEFT'     ? '/assets/capybara/postures/lfsl.png' :
                         '/assets/capybara/logo.png'
                       }
                       alt="Capybara Coach"

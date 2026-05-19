@@ -6,8 +6,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 
 export type OccupancyState = 'occupied' | 'empty' | 'uncertain';
 export type AlertStatus    = 'IDLE' | 'WARNING' | 'COOLDOWN';
-export type PostureLabel   = 'NUP' | 'LF' | 'LB' | 'LFSR' | 'LFSL'
-                           | 'CRL' | 'CLL' | 'CRLL' | 'CLLL' | 'EMPTY' | 'OBJECT';
+export type PostureLabel   = 'UPRIGHT' | 'FORWARD' | 'BACKWARD' | 'RIGHT' | 'LEFT'
+                           | 'EMPTY' | 'OBJECT';
 
 export interface FogRealtimeUpdate {
   record_type:            'realtime_update';

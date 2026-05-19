@@ -35,9 +35,9 @@ export const AIAdvisor: React.FC = () => {
         if (lastMsg && !lastMsg.isUser && lastMsg.time === now) return prev;
 
         let advice = "";
-        if (posture === 'LF') advice = "I notice you are leaning forward. This often correlates with 'mouse arm fatigue'. I recommend a quick reset: focus on retracting your shoulders.";
-        else if (posture === 'LB') advice = "You're leaning quite far back. Make sure your lower back is supported by the chair.";
-        else if (posture.includes('CRL') || posture.includes('CLL')) advice = "I detect crossed legs. This can misalign your pelvis over time. Try to keep both feet flat on the floor.";
+        if (posture === 'FORWARD') advice = "I notice you are leaning forward. This often correlates with 'mouse arm fatigue'. I recommend a quick reset: focus on retracting your shoulders.";
+        else if (posture === 'BACKWARD') advice = "You're leaning quite far back. Make sure your lower back is supported by the chair.";
+        else if (posture === 'RIGHT' || posture === 'LEFT') advice = "I detect an uneven lateral lean. This can misalign your spine over time. Try to center your weight evenly.";
         else advice = "I'm detecting some postural deviation. Please sit upright.";
 
         return [...prev, {

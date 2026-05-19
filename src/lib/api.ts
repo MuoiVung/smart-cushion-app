@@ -11,15 +11,11 @@
 // view computed from the 9 labels, for the donut chart on the dashboard.
 
 export type PostureDistributionPct = {
-  nup_pct: number;
-  lf_pct: number;
-  lb_pct: number;
-  lfsr_pct: number;
-  lfsl_pct: number;
-  crl_pct: number;
-  cll_pct: number;
-  crll_pct: number;
-  clll_pct: number;
+  upright_pct: number;
+  forward_pct: number;
+  backward_pct: number;
+  right_pct: number;
+  left_pct: number;
 };
 
 export type DailySummary = {
@@ -221,11 +217,11 @@ export type FriendlyBuckets = {
 export function toFriendlyBuckets(d?: PostureDistributionPct): FriendlyBuckets {
   const z = d ?? ({} as PostureDistributionPct);
   return {
-    upright_pct:           z.nup_pct  ?? 0,
-    slouching_forward_pct: (z.lf_pct ?? 0) + (z.lfsr_pct ?? 0) + (z.lfsl_pct ?? 0),
-    leaning_back_pct:      z.lb_pct ?? 0,
-    leaning_left_pct:      (z.cll_pct ?? 0) + (z.clll_pct ?? 0),
-    leaning_right_pct:     (z.crl_pct ?? 0) + (z.crll_pct ?? 0),
+    upright_pct:           z.upright_pct ?? 0,
+    slouching_forward_pct: z.forward_pct ?? 0,
+    leaning_back_pct:      z.backward_pct ?? 0,
+    leaning_left_pct:      z.left_pct ?? 0,
+    leaning_right_pct:     z.right_pct ?? 0,
   };
 }
 
