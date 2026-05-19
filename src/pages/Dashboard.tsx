@@ -377,15 +377,46 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
             <div className="h-48 md:h-64 flex items-end justify-between px-1 md:px-4 gap-1">
-              {dayLabels.map((day, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 md:gap-3 flex-1">
-                  <div className="w-full max-w-[1.5rem] md:max-w-[3rem] flex items-end justify-center gap-0.5 md:gap-1 h-32 md:h-48 border-b border-outline-variant/20 relative">
-                    <div className="bg-outline-variant/30 w-1.5 md:w-3 rounded-t-sm transition-all duration-500" style={{ height: `${lastWeekScores[i]}%` }}></div>
-                    <div className="bg-primary w-2 md:w-4 rounded-t-sm shadow-lg shadow-primary/20 transition-all duration-500" style={{ height: `${thisWeekScores[i]}%` }}></div>
+              {dayLabels.map((day, i) => {
+                const lwScore = lastWeekScores[i];
+                const twScore = thisWeekScores[i];
+                return (
+                  <div key={i} className="flex flex-col items-center gap-2 md:gap-3 flex-1 group/day">
+                    <div className="w-full max-w-[1.5rem] md:max-w-[3rem] flex items-end justify-center gap-0.5 md:gap-1.5 h-32 md:h-48 border-b border-outline-variant/20 relative">
+                      
+                      {/* Last Week Bar */}
+                      <div className="relative flex flex-col items-center justify-end h-full">
+                        {lwScore > 0 && (
+                          <span className="absolute -top-5 text-[7px] md:text-[9px] font-extrabold text-on-surface/40 select-none opacity-0 group-hover/day:opacity-100 transition-opacity duration-300 pointer-events-none">
+                            {lwScore}%
+                          </span>
+                        )}
+                        <div 
+                          className="bg-outline-variant/30 w-1.5 md:w-3 rounded-t-sm transition-all duration-500 cursor-help" 
+                          style={{ height: `${lwScore}%` }}
+                          title={`Last Week: ${lwScore}%`}
+                        ></div>
+                      </div>
+                      
+                      {/* This Week Bar */}
+                      <div className="relative flex flex-col items-center justify-end h-full">
+                        {twScore > 0 && (
+                          <span className="absolute -top-6 text-[8px] md:text-[10px] font-black text-primary select-none opacity-0 group-hover/day:opacity-100 transition-opacity duration-300 pointer-events-none bg-primary/5 px-1 py-0.5 rounded shadow-sm border border-primary/10">
+                            {twScore}%
+                          </span>
+                        )}
+                        <div 
+                          className="bg-primary w-2 md:w-4 rounded-t-sm shadow-lg shadow-primary/20 transition-all duration-500 cursor-help" 
+                          style={{ height: `${twScore}%` }}
+                          title={`This Week: ${twScore}%`}
+                        ></div>
+                      </div>
+
+                    </div>
+                    <span className="text-[8px] md:text-[10px] font-bold text-on-surface/40">{day}</span>
                   </div>
-                  <span className="text-[8px] md:text-[10px] font-bold text-on-surface/40">{day}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-6 md:mt-8 bg-surface-container-high rounded-xl md:rounded-2xl p-4 md:p-5 flex items-center gap-3 md:gap-4 shadow-sm border border-outline-variant/10">
               <span className="material-symbols-outlined text-primary text-xl md:text-2xl">insights</span>
