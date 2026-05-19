@@ -11,11 +11,11 @@ interface MainLayoutProps {
 }
 
 const mobileNavItems = [
-  { icon: 'home',     label: 'Posture',  path: '/live-monitor' },
+  { icon: 'home',     label: 'My Live',     path: '/live-monitor' },
   { icon: 'trending_up', label: 'Coach', path: '/' },
-  { icon: 'palette',  label: 'Shop',     path: '/shop' },
-  { icon: 'star',     label: 'Squad',    path: '/squad' },
-  { icon: 'menu_book',label: 'Passport', path: '/passport' },
+  { icon: 'palette',  label: 'Shop',      path: '/shop' },
+  { icon: 'star',     label: 'Squad',     path: '/squad' },
+  { icon: 'menu_book',label: 'Passport',  path: '/passport' },
 ];
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

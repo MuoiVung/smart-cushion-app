@@ -25,7 +25,7 @@ export default {
         "capy-success":    "#6ba66c",
         "capy-success-soft": "#c8e0b8",
         "capy-warn":       "#d4a065",
-        "capy-danger":     "#b85858",
+        "capy-danger":     "#dc2626",
         "capy-text":       "#3d2b1f",
         "capy-muted":      "#8a6a55",
         "capy-muted-2":    "#b07878",
@@ -41,7 +41,7 @@ export default {
         "spine-purple-bg": "#fae5dd",
         "spine-success":   "#6ba66c",
         "spine-warn":      "#d4a065",
-        "spine-danger":    "#b85858",
+        "spine-danger":    "#dc2626",
         "spine-text":      "#3d2b1f",
         "spine-muted":     "#8a6a55",
         "spine-muted-2":   "#b07878",
@@ -74,7 +74,7 @@ export default {
         "on-tertiary-fixed":           "#1a2810",
         "on-tertiary-fixed-variant":   "#3a5a30",
 
-        error:                         "#b85858",
+        error:                         "#dc2626",
         "on-error":                    "#ffffff",
         "error-container":             "#f5d4cb",
         "on-error-container":          "#5a1a0a",
@@ -98,6 +98,14 @@ export default {
 
         outline:                       "#e0bcb4",
         "outline-variant":             "#e0bcb4",
+
+        // ----- Legacy Theme Colors -----
+        "legacy-primary": "#00685f",
+        "legacy-bg": "#f8f9ff",
+        "legacy-on-surface": "#0b1c30",
+        "legacy-surface-low": "#eff4ff",
+        "legacy-surface-container": "#e5eeff",
+        "legacy-surface-lowest": "#ffffff",
 
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -10,7 +10,7 @@ const fmt = (secs: number) => {
 };
 
 export const CapyTopBar: React.FC = () => {
-  const { status, lastMessage, connect, disconnect, discover } = useWebSocket();
+  const { url, status, lastMessage, connect, disconnect, discover } = useWebSocket();
   const { user, refreshUser, isDemo } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -54,8 +54,12 @@ export const CapyTopBar: React.FC = () => {
     } else {
       setIsConnecting(true);
       try {
-        const url = await discover();
-        if (url) connect(url);
+        if (url) {
+          connect(url);
+        } else {
+          const discoveredUrl = await discover();
+          if (discoveredUrl) connect(discoveredUrl);
+        }
       } finally {
         setIsConnecting(false);
       }

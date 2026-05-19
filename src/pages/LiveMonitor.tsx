@@ -206,16 +206,18 @@ export const LiveMonitor: React.FC = () => {
                 <p className="text-xs font-bold uppercase tracking-wider text-capy-muted">Total</p>
               </div>
               <div>
-                <p className="text-2xl font-mono font-bold text-capy-danger">{fmt(poorDuration)}</p>
+                <p className={`text-2xl font-mono font-bold ${goodPct >= 80 ? 'text-capy-success' : goodPct >= 50 ? 'text-capy-warn' : 'text-capy-danger'}`}>{fmt(poorDuration)}</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-capy-muted">Poor</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-capy-amber font-mono">{alertCount}</p>
+                <p className={`text-2xl font-bold font-mono ${alertCount === 0 ? 'text-capy-success' : 'text-capy-danger'}`}>{alertCount}</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-capy-muted">Alerts</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-capy-success font-mono">{goodPct}%</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-capy-muted">Good %</p>
+                <p className={`text-2xl font-bold font-mono ${goodPct >= 80 ? 'text-capy-success' : goodPct >= 50 ? 'text-capy-warn' : 'text-capy-danger'}`}>{goodPct}%</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-capy-muted">
+                  {goodPct >= 80 ? 'Keep It Up' : goodPct >= 50 ? 'Improving' : 'Needs Work'}
+                </p>
               </div>
             </div>
 
