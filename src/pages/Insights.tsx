@@ -551,7 +551,7 @@ export const Insights: React.FC = () => {
                           <div className="bg-[#10b981] w-full transition-all" style={{ height: `${d.upright}%` }}></div>
                         </div>
                         <div className="text-center h-10 md:h-12">
-                          <span className="text-[8px] md:text-[10px] font-bold text-on-surface/40 uppercase block mb-0.5">{d.label.charAt(0)}</span>
+                          <span className="text-[8px] md:text-[10px] font-bold text-on-surface/40 uppercase block mb-0.5">{d.label}</span>
                           <span className="text-[8px] md:text-[10px] font-bold text-error block leading-none">{d.poorMin}m</span>
                           <span className="text-[8px] md:text-[10px] font-bold text-on-surface/60 block leading-none mt-[6px]">{d.totalSittingMin}m</span>
                         </div>
