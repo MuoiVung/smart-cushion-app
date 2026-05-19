@@ -159,18 +159,19 @@ export function secToHuman(sec: number): string {
 export type FriendlyBuckets = {
   upright_pct: number;
   slouching_forward_pct: number;
-  lean_left_pct: number;
-  lean_right_pct: number;
+  leaning_back_pct: number;
+  leaning_left_pct: number;
+  leaning_right_pct: number;
 };
 
 export function toFriendlyBuckets(d?: PostureDistributionPct): FriendlyBuckets {
   const z = d ?? ({} as PostureDistributionPct);
   return {
     upright_pct:           z.nup_pct  ?? 0,
-    // LB folds in here — frontend has no separate lean_back slot.
-    slouching_forward_pct: (z.lf_pct ?? 0) + (z.lfsr_pct ?? 0) + (z.lfsl_pct ?? 0) + (z.lb_pct ?? 0),
-    lean_left_pct:         (z.cll_pct ?? 0) + (z.clll_pct ?? 0),
-    lean_right_pct:        (z.crl_pct ?? 0) + (z.crll_pct ?? 0),
+    slouching_forward_pct: (z.lf_pct ?? 0) + (z.lfsr_pct ?? 0) + (z.lfsl_pct ?? 0),
+    leaning_back_pct:      z.lb_pct ?? 0,
+    leaning_left_pct:      (z.cll_pct ?? 0) + (z.clll_pct ?? 0),
+    leaning_right_pct:     (z.crl_pct ?? 0) + (z.crll_pct ?? 0),
   };
 }
 

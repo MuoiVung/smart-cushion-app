@@ -229,20 +229,22 @@ export const Insights: React.FC = () => {
     : (sessions.data ? sessions.data.total_count : 0);
 
   // Aggregate Key Posture over 7 days (missing days count as 0% for the week)
-  let upSum = 0, sfSum = 0, lrSum = 0, llSum = 0;
+  let upSum = 0, sfSum = 0, lbSum = 0, lrSum = 0, llSum = 0;
   if (activeSummaries) {
     for (const d of activeSummaries) {
       const fb = toFriendlyBuckets(d.posture_distribution_pct);
       upSum += fb.upright_pct;
       sfSum += fb.slouching_forward_pct;
-      lrSum += fb.lean_right_pct;
-      llSum += fb.lean_left_pct;
+      lbSum += fb.leaning_back_pct;
+      lrSum += fb.leaning_right_pct;
+      llSum += fb.leaning_left_pct;
     }
   }
 
   // Calculate final average percentages (always divided by 7)
   const upAvg = upSum / 7;
   const sfAvg = sfSum / 7;
+  const lbAvg = lbSum / 7;
   const lrAvg = lrSum / 7;
   const llAvg = llSum / 7;
 
@@ -259,8 +261,9 @@ export const Insights: React.FC = () => {
     return {
       upright_pct: 0,
       slouching_forward_pct: 0,
-      lean_right_pct: 0,
-      lean_left_pct: 0,
+      leaning_back_pct: 0,
+      leaning_right_pct: 0,
+      leaning_left_pct: 0,
     };
   });
 
@@ -282,24 +285,32 @@ export const Insights: React.FC = () => {
       avg: sfAvg,
     },
     {
-      label: 'Lean Right',
+      label: 'Leaning Back',
+      color: 'bg-[#a855f7]',
+      textColor: 'text-[#a855f7]',
+      daily: dailyDistribution.map(d => d.leaning_back_pct),
+      sum: lbSum,
+      avg: lbAvg,
+    },
+    {
+      label: 'Leaning Right',
       color: 'bg-[#f59e0b]',
       textColor: 'text-[#f59e0b]',
-      daily: dailyDistribution.map(d => d.lean_right_pct),
+      daily: dailyDistribution.map(d => d.leaning_right_pct),
       sum: lrSum,
       avg: lrAvg,
     },
     {
-      label: 'Lean Left',
+      label: 'Leaning Left',
       color: 'bg-[#60a5fa]',
       textColor: 'text-[#60a5fa]',
-      daily: dailyDistribution.map(d => d.lean_left_pct),
+      daily: dailyDistribution.map(d => d.leaning_left_pct),
       sum: llSum,
       avg: llAvg,
     },
   ];
 
-  const maxVal = Math.max(upAvg, sfAvg, lrAvg, llAvg);
+  const maxVal = Math.max(upAvg, sfAvg, lbAvg, lrAvg, llAvg);
   const dominantPostures = rows.filter(p => Math.abs(p.avg - maxVal) < 0.01 && p.avg > 0);
   const finalDominants = dominantPostures.length > 0 ? dominantPostures : [rows[0]];
 
@@ -332,18 +343,21 @@ export const Insights: React.FC = () => {
     if (score <= 50) {
       if (posture === 'Upright') return "You had some good posture moments this week. Keep going little by little.";
       if (posture === 'Slouching Forward') return "This week felt a little tough. Try to sit a bit more upright in your next sessions.";
-      if (posture === 'Lean Left') return "This week felt a little tough. Try to sit a little more evenly and avoid leaning left for too long.";
-      if (posture === 'Lean Right') return "This week felt a little tough. Try to sit a little more evenly and avoid leaning right for too long.";
+      if (posture === 'Leaning Back') return "This week felt a little tough. You tend to recline too much — try moving your seat closer to the desk and keep your lower back supported.";
+      if (posture === 'Leaning Left') return "This week felt a little tough. Try to sit a little more evenly and avoid leaning left for too long.";
+      if (posture === 'Leaning Right') return "This week felt a little tough. Try to sit a little more evenly and avoid leaning right for too long.";
     } else if (score < 80) {
       if (posture === 'Upright') return "You're making progress this week. Upright posture showed up most often, so keep building on that.";
       if (posture === 'Slouching Forward') return "You're making progress this week. Keep going and try to reduce forward slouching in longer sessions.";
-      if (posture === 'Lean Left') return "You're making progress this week. Keep going and try to stay a little more balanced instead of leaning left.";
-      if (posture === 'Lean Right') return "You're making progress this week. Keep going and try to stay a little more balanced instead of leaning right.";
+      if (posture === 'Leaning Back') return "You're making progress this week. Keep going and try to reduce reclining — make sure your monitor is at eye level so you don't need to lean back.";
+      if (posture === 'Leaning Left') return "You're making progress this week. Keep going and try to stay a little more balanced instead of leaning left.";
+      if (posture === 'Leaning Right') return "You're making progress this week. Keep going and try to stay a little more balanced instead of leaning right.";
     } else {
       if (posture === 'Upright') return "You did really well this week. Upright posture was your strongest pattern. Keep it up.";
       if (posture === 'Slouching Forward') return "You did really well this week. Keep it up and try to ease back on forward slouching a little more.";
-      if (posture === 'Lean Left') return "You did really well this week. Keep it up and try to sit a little more evenly instead of leaning left.";
-      if (posture === 'Lean Right') return "You did really well this week. Keep it up and try to sit a little more evenly instead of leaning right.";
+      if (posture === 'Leaning Back') return "You did really well this week. Keep it up and try to maintain a neutral spine instead of reclining — your lower back will thank you.";
+      if (posture === 'Leaning Left') return "You did really well this week. Keep it up and try to sit a little more evenly instead of leaning left.";
+      if (posture === 'Leaning Right') return "You did really well this week. Keep it up and try to sit a little more evenly instead of leaning right.";
     }
     return "Performance stable. Keep it up!";
   };
@@ -409,8 +423,9 @@ export const Insights: React.FC = () => {
         totalSittingMin,
         upright: fb.upright_pct,
         slouch: fb.slouching_forward_pct,
-        leanRight: fb.lean_right_pct,
-        leanLeft: fb.lean_left_pct,
+        leaningBack: fb.leaning_back_pct,
+        leaningRight: fb.leaning_right_pct,
+        leaningLeft: fb.leaning_left_pct,
       };
     })
     .sort((a, b) => a.dayIndex - b.dayIndex);
@@ -529,8 +544,9 @@ export const Insights: React.FC = () => {
                     {weeklyData.map((d, i) => (
                       <div key={i} className="flex flex-col items-center gap-2 flex flex-1">
                         <div className="w-full max-w-[1.5rem] md:max-w-[2.5rem] flex flex-col justify-end h-32 md:h-48 rounded-md md:rounded-lg overflow-hidden bg-white/20">
-                          <div className="bg-[#60a5fa] w-full transition-all" style={{ height: `${d.leanLeft}%` }}></div>
-                          <div className="bg-[#f59e0b] w-full transition-all" style={{ height: `${d.leanRight}%` }}></div>
+                          <div className="bg-[#60a5fa] w-full transition-all" style={{ height: `${d.leaningLeft}%` }}></div>
+                          <div className="bg-[#f59e0b] w-full transition-all" style={{ height: `${d.leaningRight}%` }}></div>
+                          <div className="bg-[#a855f7] w-full transition-all" style={{ height: `${d.leaningBack}%` }}></div>
                           <div className="bg-error w-full transition-all" style={{ height: `${d.slouch}%` }}></div>
                           <div className="bg-[#10b981] w-full transition-all" style={{ height: `${d.upright}%` }}></div>
                         </div>
@@ -546,8 +562,9 @@ export const Insights: React.FC = () => {
                 <div className="flex flex-wrap gap-4 md:gap-8 justify-center mt-6">
                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#10b981]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Upright</span></div>
                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-error"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Slouching Forward</span></div>
-                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Lean Right</span></div>
-                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#60a5fa]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Lean Left</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#a855f7]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Leaning Back</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Leaning Right</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-[#60a5fa]"></div><span className="text-[10px] md:text-xs font-bold text-on-surface/60">Leaning Left</span></div>
                 </div>
                 {/* Collapsible Key Posture Calculation Details Table */}
                 <div className="mt-8 border-t border-outline-variant/10 pt-6">
@@ -586,14 +603,14 @@ export const Insights: React.FC = () => {
                               </td>
                               {row.daily.map((val, idx) => (
                                 <td key={idx} className="p-3 text-center font-mono font-medium text-on-surface/70">
-                                  {val}%
+                                  {Number.isInteger(val) ? `${val}%` : `${val.toFixed(1)}%`}
                                 </td>
                               ))}
                               <td className="p-3 text-center font-mono font-black text-on-surface bg-surface-container/50">
-                                {row.sum}%
+                                {Number.isInteger(row.sum) ? `${row.sum}%` : `${row.sum.toFixed(1)}%`}
                               </td>
                               <td className="p-3 text-center font-mono font-black bg-primary/5 text-primary">
-                                {row.avg.toFixed(1)}%
+                                {Number.isInteger(row.avg) ? `${row.avg}%` : `${row.avg.toFixed(1)}%`}
                               </td>
                             </tr>
                           ))}
