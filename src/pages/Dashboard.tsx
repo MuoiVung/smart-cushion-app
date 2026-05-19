@@ -381,16 +381,20 @@ export const Dashboard: React.FC = () => {
                 const lwScore = lastWeekScores[i];
                 const twScore = thisWeekScores[i];
                 return (
-                  <div key={i} className="flex flex-col items-center gap-2 md:gap-3 flex-1 group/day">
+                  <div key={i} className="flex flex-col items-center gap-2 md:gap-3 flex-1 group/day relative">
+                    {/* Unified Floating Pill Badge */}
+                    {(lwScore > 0 || twScore > 0) && (
+                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover/day:opacity-100 transition-opacity duration-300 pointer-events-none z-10 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-full shadow-md border border-outline-variant/30 text-[7px] md:text-[9px] flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
+                        {lwScore > 0 && <span className="text-on-surface/40 font-bold">{lwScore}%</span>}
+                        {lwScore > 0 && twScore > 0 && <span className="text-outline-variant/40">|</span>}
+                        {twScore > 0 && <span className="text-primary font-black">{twScore}%</span>}
+                      </div>
+                    )}
+
                     <div className="w-full max-w-[1.5rem] md:max-w-[3rem] flex items-end justify-center gap-0.5 md:gap-1.5 h-32 md:h-48 border-b border-outline-variant/20 relative">
                       
                       {/* Last Week Bar */}
                       <div className="relative flex flex-col items-center justify-end h-full">
-                        {lwScore > 0 && (
-                          <span className="absolute -top-5 text-[7px] md:text-[9px] font-extrabold text-on-surface/40 select-none opacity-0 group-hover/day:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            {lwScore}%
-                          </span>
-                        )}
                         <div 
                           className="bg-outline-variant/30 w-1.5 md:w-3 rounded-t-sm transition-all duration-500 cursor-help" 
                           style={{ height: `${lwScore}%` }}
@@ -400,11 +404,6 @@ export const Dashboard: React.FC = () => {
                       
                       {/* This Week Bar */}
                       <div className="relative flex flex-col items-center justify-end h-full">
-                        {twScore > 0 && (
-                          <span className="absolute -top-6 text-[8px] md:text-[10px] font-black text-primary select-none opacity-0 group-hover/day:opacity-100 transition-opacity duration-300 pointer-events-none bg-primary/5 px-1 py-0.5 rounded shadow-sm border border-primary/10">
-                            {twScore}%
-                          </span>
-                        )}
                         <div 
                           className="bg-primary w-2 md:w-4 rounded-t-sm shadow-lg shadow-primary/20 transition-all duration-500 cursor-help" 
                           style={{ height: `${twScore}%` }}
