@@ -135,25 +135,35 @@ export const Insights: React.FC = () => {
 
   const totalSessions = sessions.data ? sessions.data.total_count : 0;
 
-  // Aggregate Key Posture over 7 days (missing days count as 0% for the week)
-  let upSum = 0, sfSum = 0, lbSum = 0, lrSum = 0, llSum = 0;
-  if (activeSummaries) {
-    for (const d of activeSummaries) {
-      const fb = toFriendlyBuckets(d.posture_distribution_pct);
-      upSum += fb.upright_pct;
-      sfSum += fb.slouching_forward_pct;
-      lbSum += fb.leaning_back_pct;
-      lrSum += fb.leaning_right_pct;
-      llSum += fb.leaning_left_pct;
-    }
-  }
+  // Aggregate Key Posture over current week (using time-weighted true posture durations)
+  const { upAvg, sfAvg, lbAvg, lrAvg, llAvg } = useMemo(() => {
+    let totalSittingSec = 0;
+    let upSec = 0, sfSec = 0, lbSec = 0, lrSec = 0, llSec = 0;
 
-  // Calculate final average percentages (always divided by 7)
-  const upAvg = upSum / 7;
-  const sfAvg = sfSum / 7;
-  const lbAvg = lbSum / 7;
-  const lrAvg = lrSum / 7;
-  const llAvg = llSum / 7;
+    for (const d of currentWeekSummaries) {
+      const fb = toFriendlyBuckets(d.posture_distribution_pct);
+      const daySec = d.total_sitting_duration_sec;
+      totalSittingSec += daySec;
+
+      upSec += (fb.upright_pct / 100) * daySec;
+      sfSec += (fb.slouching_forward_pct / 100) * daySec;
+      lbSec += (fb.leaning_back_pct / 100) * daySec;
+      lrSec += (fb.leaning_right_pct / 100) * daySec;
+      llSec += (fb.leaning_left_pct / 100) * daySec;
+    }
+
+    if (totalSittingSec === 0) {
+      return { upAvg: 0, sfAvg: 0, lbAvg: 0, lrAvg: 0, llAvg: 0 };
+    }
+
+    return {
+      upAvg: (upSec / totalSittingSec) * 100,
+      sfAvg: (sfSec / totalSittingSec) * 100,
+      lbAvg: (lbSec / totalSittingSec) * 100,
+      lrAvg: (lrSec / totalSittingSec) * 100,
+      llAvg: (llSec / totalSittingSec) * 100,
+    };
+  }, [currentWeekSummaries]);
 
   // Build a 7-day posture distribution lookup (0=Mon, 6=Sun)
   const dailyDistribution = useMemo(() => {
@@ -178,7 +188,6 @@ export const Insights: React.FC = () => {
       color: 'bg-[#10b981]',
       textColor: 'text-[#10b981]',
       daily: dailyDistribution.map(d => d.upright_pct),
-      sum: upSum,
       avg: upAvg,
     },
     {
@@ -186,7 +195,6 @@ export const Insights: React.FC = () => {
       color: 'bg-error',
       textColor: 'text-error',
       daily: dailyDistribution.map(d => d.slouching_forward_pct),
-      sum: sfSum,
       avg: sfAvg,
     },
     {
@@ -194,7 +202,6 @@ export const Insights: React.FC = () => {
       color: 'bg-[#a855f7]',
       textColor: 'text-[#a855f7]',
       daily: dailyDistribution.map(d => d.leaning_back_pct),
-      sum: lbSum,
       avg: lbAvg,
     },
     {
@@ -202,7 +209,6 @@ export const Insights: React.FC = () => {
       color: 'bg-[#f59e0b]',
       textColor: 'text-[#f59e0b]',
       daily: dailyDistribution.map(d => d.leaning_right_pct),
-      sum: lrSum,
       avg: lrAvg,
     },
     {
@@ -210,7 +216,6 @@ export const Insights: React.FC = () => {
       color: 'bg-[#60a5fa]',
       textColor: 'text-[#60a5fa]',
       daily: dailyDistribution.map(d => d.leaning_left_pct),
-      sum: llSum,
       avg: llAvg,
     },
   ];
@@ -493,8 +498,7 @@ export const Insights: React.FC = () => {
                             <th className="p-3 text-center">Fri</th>
                             <th className="p-3 text-center">Sat</th>
                             <th className="p-3 text-center">Sun</th>
-                            <th className="p-3 text-center bg-surface-container">Sum</th>
-                            <th className="p-3 text-center bg-primary/10 text-primary">Average (÷7)</th>
+                            <th className="p-3 text-center bg-surface-container text-on-surface">Weekly Average</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/5">
@@ -510,9 +514,6 @@ export const Insights: React.FC = () => {
                                 </td>
                               ))}
                               <td className="p-3 text-center font-mono font-black text-on-surface bg-surface-container/50">
-                                {Number.isInteger(row.sum) ? `${row.sum}%` : `${row.sum.toFixed(1)}%`}
-                              </td>
-                              <td className="p-3 text-center font-mono font-black bg-primary/5 text-primary">
                                 {Number.isInteger(row.avg) ? `${row.avg}%` : `${row.avg.toFixed(1)}%`}
                               </td>
                             </tr>
