@@ -253,7 +253,7 @@ export const Dashboard: React.FC = () => {
     switch (currentPosture) {
       case 'EMPTY':
         return {
-          title: 'No Person Seated',
+          title: 'No One Seated',
           sub: 'Cushion is ready',
           icon: 'check_circle',
           iconBg: 'bg-on-surface/10 text-on-surface/40',
@@ -272,7 +272,7 @@ export const Dashboard: React.FC = () => {
           ? (lastMsg.posture_accuracy_score > 1 ? lastMsg.posture_accuracy_score : lastMsg.posture_accuracy_score * 100) 
           : 94.2;
         return {
-          title: 'Good Posture',
+          title: 'Natural Upright Posture',
           sub: `Confidence: ${nupScore.toFixed(1)}%`,
           icon: 'check_circle',
           iconBg: 'bg-[#10b981]/10 text-[#10b981]',
@@ -281,14 +281,14 @@ export const Dashboard: React.FC = () => {
       default:
         // Poor posture: LF, LB, LFSR, LFSL, CRL, CLL, CRLL, CLLL
         const poorLabel = 
-          currentPosture === 'LF'   ? 'Leaning Forward' :
-          currentPosture === 'LB'   ? 'Leaning Backward' :
-          currentPosture === 'LFSR' ? 'Lean Fwd – Right' :
-          currentPosture === 'LFSL' ? 'Lean Fwd – Left' :
-          currentPosture === 'CRL'  ? 'Cross-Leg (Right)' :
-          currentPosture === 'CLL'  ? 'Cross-Leg (Left)' :
-          currentPosture === 'CRLL' ? 'Cross-Leg Deep (Right)' :
-          currentPosture === 'CLLL' ? 'Cross-Leg Deep (Left)' : 'Poor Posture';
+          currentPosture === 'LF'   ? 'Lean Forward' :
+          currentPosture === 'LB'   ? 'Lean Backward' :
+          currentPosture === 'LFSR' ? 'Lean Forward Support Right' :
+          currentPosture === 'LFSL' ? 'Lean Forward Support Left' :
+          currentPosture === 'CRL'  ? 'Cross-Right Legged' :
+          currentPosture === 'CLL'  ? 'Cross-Left Legged' :
+          currentPosture === 'CRLL' ? 'Cross-Right Legged Deep' :
+          currentPosture === 'CLLL' ? 'Cross-Left Legged Deep' : 'Poor Posture';
         const badScore = lastMsg?.posture_accuracy_score 
           ? (lastMsg.posture_accuracy_score > 1 ? lastMsg.posture_accuracy_score : lastMsg.posture_accuracy_score * 100) 
           : 88.5;
