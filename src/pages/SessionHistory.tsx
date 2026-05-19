@@ -82,11 +82,11 @@ export const SessionHistory: React.FC = () => {
   const today = useMemo(todayIso, []);
   const from = useMemo(() => isoDaysAgo(29), []);
 
-  const fetchPage = async (page: number) => {
+  const fetchPage = async (page: number, force = false) => {
     const startIdx = (page - 1) * pageSize;
     
-    // CACHE CHECK: If we already have data for the first item of this page, skip fetch
-    if (allSessions[startIdx] !== undefined) return;
+    // CACHE CHECK: If we already have data for the first item of this page, skip fetch (unless forced)
+    if (!force && allSessions[startIdx] !== undefined) return;
 
     setLoading(true);
     try {
@@ -94,7 +94,7 @@ export const SessionHistory: React.FC = () => {
       const resp = await fetchSessions(cfg.deviceId, from, today, pageSize, startIdx);
       
       setAllSessions(prev => {
-        const newList = [...prev];
+        const newList = force ? [] : [...prev];
         // Pad the array if we are jumping to a far page
         if (newList.length < startIdx + resp.sessions.length) {
           const filler = new Array(startIdx + resp.sessions.length - newList.length).fill(undefined);
@@ -136,11 +136,10 @@ export const SessionHistory: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    setAllSessions([]);
     setTotalRecords(0);
     setCloudAggregates({ total_duration_sec: 0, total_poor_duration_sec: 0, total_alerts: 0 });
     setCurrentPage(1);
-    fetchPage(1);
+    fetchPage(1, true);
   };
 
   // AI Insights use Cloud-side totals, not just loaded sessions
@@ -151,61 +150,61 @@ export const SessionHistory: React.FC = () => {
     totalSec > 0 ? Math.round(((totalSec - totalPoorSec) / totalSec) * 100) : 0;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex justify-between items-center w-full px-4 md:px-8 py-4 bg-spine-bg print:hidden">
-        <div className="flex items-center gap-4">
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-on-surface">PostureAI</span>
+    <div className="flex flex-col min-h-screen bg-spine-bg">
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-break { page-break-after: always; }
+          body { background: white !important; }
+          .bg-surface-container-low { background: white !important; border: 1px solid #eee; }
+        }
+      `}</style>
+      <header className="flex justify-between items-center w-full px-4 md:px-8 py-6 md:py-8 gap-4">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-on-surface leading-none">My Session History</h1>
+          <p className="text-lg md:text-xl font-medium tracking-tight text-on-surface/60 mt-1">
+            {`Last 1 month · device ${cfg.deviceId}`}
+          </p>
         </div>
-        <div className="flex items-center gap-4 md:gap-8">
-          <nav className="hidden md:flex gap-6 items-center">
-            <a className="text-on-surface/60 hover:text-primary transition-colors duration-200 font-medium tracking-tight" href="#">Support</a>
-            <a className="text-on-surface/60 hover:text-primary transition-colors duration-200 font-medium tracking-tight" href="#">Docs</a>
-          </nav>
-          <div className="flex items-center gap-2 md:gap-3">
-            <button
-              onClick={handleRefresh}
-              className="p-2 text-on-surface/70 hover:text-primary transition-colors"
-              title="Refresh"
-            >
-              <span className="material-symbols-outlined text-xl md:text-2xl">refresh</span>
-            </button>
-            <button className="p-2 text-on-surface/70 hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-xl md:text-2xl">notifications</span>
-            </button>
-            <div className="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/10">
-               <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop" alt="User" className="w-full h-full object-cover" />
-            </div>
-          </div>
+        <div className="flex items-center gap-3 md:gap-4 no-print">
+          {/* Refresh button */}
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="flex items-center gap-2 px-5 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant/30 rounded-xl text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-md shadow-black/5 disabled:opacity-40"
+            title="Refresh data"
+          >
+            <span className={`material-symbols-outlined text-sm md:text-base ${loading ? 'animate-spin' : ''}`}>
+              refresh
+            </span>
+            <span>Refresh</span>
+          </button>
+
+          {/* Export CSV button */}
+          <button
+            onClick={() => downloadCsv(allSessions)}
+            disabled={!allSessions.length}
+            className="flex items-center gap-2 px-5 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant/30 rounded-xl text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-md shadow-black/5 disabled:opacity-40"
+            title="Export CSV"
+          >
+            <span className="material-symbols-outlined text-sm md:text-base">table_view</span>
+            <span>Export</span>
+          </button>
+
+          {/* Export PDF / Print button */}
+          <button
+            onClick={() => window.print()}
+            disabled={!allSessions.length}
+            className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-40"
+            title="Export PDF"
+          >
+            <span className="material-symbols-outlined text-sm md:text-base">picture_as_pdf</span>
+            <span>PDF</span>
+          </button>
         </div>
       </header>
 
       <div className="flex-1 px-4 md:px-12 py-6 md:py-10 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-12 gap-6">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-black text-on-surface tracking-tighter mb-1 md:mb-2 leading-none">My Session History</h1>
-            <p className="text-on-surface/50 text-sm md:text-lg">
-              {`Last 1 month · device ${cfg.deviceId}`}
-            </p>
-          </div>
-          <div className="flex gap-2 md:gap-3 w-full sm:w-auto">
-            <button
-              onClick={() => downloadCsv(allSessions)}
-              disabled={!allSessions.length}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-white text-primary border border-outline-variant/20 rounded-xl font-bold hover:bg-surface-bright transition-all shadow-sm text-xs md:text-base disabled:opacity-50 print:hidden"
-            >
-              <span className="material-symbols-outlined text-sm md:text-base">table_view</span>
-              Export
-            </button>
-            <button
-              onClick={() => window.print()}
-              disabled={!allSessions.length}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-md text-xs md:text-base disabled:opacity-50 print:hidden"
-            >
-              <span className="material-symbols-outlined text-sm md:text-base">picture_as_pdf</span>
-              PDF
-            </button>
-          </div>
-        </div>
 
         {error && (
           <div className="mb-8 p-4 md:p-6 rounded-2xl bg-error-container text-on-error-container">
