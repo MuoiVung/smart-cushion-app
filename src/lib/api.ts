@@ -100,6 +100,9 @@ async function request<T>(path: string): Promise<T> {
 // In-memory cache to prevent duplicate network calls for historical daily summaries.
 const summaryCache: Record<string, DailySummary> = {};
 
+// Active in-flight daily summary requests to collapse duplicate concurrent queries.
+const activeSummaryRequests: Record<string, Promise<DailySummary> | undefined> = {};
+
 export async function fetchSummary(
   deviceId: string,
   date: string,
@@ -107,20 +110,32 @@ export async function fetchSummary(
   const cacheKey = `${deviceId}:${date}`;
   const todayStr = todayIso();
 
-  // Always query today fresh to ensure real-time posture updates.
-  // Cache historical dates to prevent unnecessary concurrent flooding.
+  // 1. Return cached historical summaries immediately.
   if (date !== todayStr && summaryCache[cacheKey]) {
     return summaryCache[cacheKey];
   }
 
-  const data = await request<DailySummary>(
-    `/summary?device_id=${encodeURIComponent(deviceId)}&date=${encodeURIComponent(date)}`,
-  );
-
-  if (date !== todayStr) {
-    summaryCache[cacheKey] = data;
+  // 2. Collapse concurrent duplicate requests: reuse the in-flight promise.
+  if (activeSummaryRequests[cacheKey]) {
+    return activeSummaryRequests[cacheKey];
   }
-  return data;
+
+  // 3. Fire new network request and track its promise.
+  const promise = request<DailySummary>(
+    `/summary?device_id=${encodeURIComponent(deviceId)}&date=${encodeURIComponent(date)}`,
+  ).then((data) => {
+    if (date !== todayStr) {
+      summaryCache[cacheKey] = data;
+    }
+    delete activeSummaryRequests[cacheKey];
+    return data;
+  }).catch((err) => {
+    delete activeSummaryRequests[cacheKey];
+    throw err;
+  });
+
+  activeSummaryRequests[cacheKey] = promise;
+  return promise;
 }
 
 export async function fetchSummaries(
@@ -139,8 +154,17 @@ export async function fetchSummaries(
     d.setDate(start.getDate() + i);
     dates.push(d.toISOString().slice(0, 10));
   }
-  return Promise.all(dates.map((date) => fetchSummary(deviceId, date)));
+
+  // Fetch sequentially to prevent parallel concurrency overloading (rate limits & Cold Starts) on AWS.
+  const results: DailySummary[] = [];
+  for (const date of dates) {
+    results.push(await fetchSummary(deviceId, date));
+  }
+  return results;
 }
+
+// Active sessions request promise tracker to collapse duplicate concurrent queries.
+let activeSessionsRequest: { key: string; promise: Promise<SessionsResponse> } | null = null;
 
 export async function fetchSessions(
   deviceId: string,
@@ -149,9 +173,24 @@ export async function fetchSessions(
   limit: number = 100,
   offset: number = 0
 ): Promise<SessionsResponse> {
-  return request<SessionsResponse>(
+  const requestKey = `${deviceId}:${from}:${to}:${limit}:${offset}`;
+
+  if (activeSessionsRequest && activeSessionsRequest.key === requestKey) {
+    return activeSessionsRequest.promise;
+  }
+
+  const promise = request<SessionsResponse>(
     `/sessions?device_id=${encodeURIComponent(deviceId)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&limit=${limit}&offset=${offset}&sort_by=session_start&order=desc`,
-  );
+  ).then((data) => {
+    activeSessionsRequest = null;
+    return data;
+  }).catch((err) => {
+    activeSessionsRequest = null;
+    throw err;
+  });
+
+  activeSessionsRequest = { key: requestKey, promise };
+  return promise;
 }
 
 // ─── Display helpers ────────────────────────────────────────────────────
