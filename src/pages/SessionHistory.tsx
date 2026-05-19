@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import {
   fetchSessions,
   getApiConfig,
-  isMockMode,
   isoDaysAgo,
   todayIso,
   type SessionRecord,
@@ -185,9 +184,7 @@ export const SessionHistory: React.FC = () => {
           <div>
             <h1 className="text-3xl md:text-5xl font-black text-on-surface tracking-tighter mb-1 md:mb-2 leading-none">My Session History</h1>
             <p className="text-on-surface/50 text-sm md:text-lg">
-              {isMockMode()
-                ? 'Last 1 month'
-                : `Last 1 month · device ${cfg.deviceId}`}
+              {`Last 1 month · device ${cfg.deviceId}`}
             </p>
           </div>
           <div className="flex gap-2 md:gap-3 w-full sm:w-auto">

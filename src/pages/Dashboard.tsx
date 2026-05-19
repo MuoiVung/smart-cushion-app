@@ -5,8 +5,6 @@ import {
   fetchSummaries,
   fetchSessions,
   getApiConfig,
-  isMockMode,
-  isoDaysAgo,
   secToHuman,
   todayIso,
   type DailySummary,
@@ -56,58 +54,6 @@ function weeklyScoreFromSessions(sessions: SessionsResponse): number {
 
 // ─── Mock data factories (deterministic-ish, used only when no API URL set) ──
 
-function mockSummaries7Days(deviceId: string): DailySummary[] {
-  const out: DailySummary[] = [];
-  const sittingMins = [120, 180, 90, 240, 150, 210, 80];
-  for (let i = 6; i >= 0; i--) {
-    const date = isoDaysAgo(i);
-    const totalMin = sittingMins[6 - i];
-    const totalSec = totalMin * 60;
-    const poorSec  = Math.round(totalSec * (0.2 + (i % 4) * 0.05));
-    out.push({
-      schema_version: '1.0',
-      device_id: deviceId,
-      date,
-      total_sitting_duration_sec: totalSec,
-      poor_posture_duration_sec: poorSec,
-      alert_count: Math.round(totalMin * 0.15),
-      posture_distribution_pct: {
-        nup_pct:  55, lf_pct: 15, lb_pct: 8,
-        lfsr_pct: 5,  lfsl_pct: 4,
-        crl_pct:  5,  cll_pct: 5,
-        crll_pct: 2,  clll_pct: 1,
-      },
-    });
-  }
-  return out;
-}
-
-function mockSessionsResp(deviceId: string): SessionsResponse {
-  const sessions = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = isoDaysAgo(i);
-    const durSec = (120 + (i * 20)) * 60;
-    sessions.push({
-      session_id: `mock-${date}`,
-      start_time_iso: `${date}T09:00:00Z`,
-      end_time_iso:   `${date}T11:00:00Z`,
-      duration_sec: durSec,
-      poor_posture_duration_sec: Math.round(durSec * 0.25),
-      alert_count: 5 + i,
-    });
-  }
-  const total_duration_sec = sessions.reduce((s, x) => s + x.duration_sec, 0);
-  const total_poor_duration_sec = sessions.reduce((s, x) => s + x.poor_posture_duration_sec, 0);
-  const total_alerts = sessions.reduce((s, x) => s + x.alert_count, 0);
-  return {
-    schema_version: '1.0',
-    device_id: deviceId,
-    total_count: sessions.length,
-    aggregates: { total_duration_sec, total_poor_duration_sec, total_alerts },
-    sessions,
-  };
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const Dashboard: React.FC = () => {
@@ -115,7 +61,14 @@ export const Dashboard: React.FC = () => {
   const ws = useWebSocket();
   const cfg   = useMemo(getApiConfig, []);
   const today = useMemo(todayIso, []);
-  const from  = useMemo(() => isoDaysAgo(6), []);
+  const from  = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMon = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMon - 7); // Monday of last week
+    return monday.toISOString().slice(0, 10);
+  }, []);
 
   const summaries = useApiData<DailySummary[]>(
     () => fetchSummaries(cfg.deviceId, from, today),
@@ -127,43 +80,25 @@ export const Dashboard: React.FC = () => {
   );
 
   const loading = summaries.loading || sessions.loading;
-  const error   = summaries.error   || summaries.error; // summaries or sessions error
+  const error   = summaries.error   || sessions.error; // summaries or sessions error
 
   const refresh = () => { summaries.refresh(); sessions.refresh(); };
 
-  // ── Resolved data (real or mock) ──────────────────────────────────────────
+  // ── Resolved data (real cloud data only) ──────────────────────────────────
   const activeSummaries: DailySummary[] = useMemo(() => {
-    if (!isMockMode()) return summaries.data ?? [];
-    return mockSummaries7Days(cfg.deviceId);
-  }, [isMockMode(), summaries.data, cfg.deviceId]);
+    return summaries.data ?? [];
+  }, [summaries.data]);
 
   const activeSessions: SessionsResponse = useMemo(() => {
-    if (!isMockMode()) return sessions.data ?? mockSessionsResp(cfg.deviceId);
-    return mockSessionsResp(cfg.deviceId);
-  }, [isMockMode(), sessions.data, cfg.deviceId]);
+    return sessions.data ?? {
+      schema_version: '1.0',
+      device_id: cfg.deviceId,
+      total_count: 0,
+      aggregates: { total_duration_sec: 0, total_poor_duration_sec: 0, total_alerts: 0 },
+      sessions: []
+    };
+  }, [sessions.data, cfg.deviceId]);
 
-  // ── Core stats ─────────────────────────────────────────────────────────────
-  const weeklyScore = useMemo(() => {
-    if (!isMockMode() && sessions.data) return weeklyScoreFromSessions(sessions.data);
-    return weeklyScoreFromSummaries(activeSummaries);
-  }, [activeSummaries, sessions.data]);
-
-  const { sub, color, emoji } = scoreMeta(weeklyScore);
-
-  const totalSittingSec = useMemo(
-    () => activeSummaries.reduce((s, d) => s + d.total_sitting_duration_sec, 0),
-    [activeSummaries],
-  );
-  const totalPoorSec = useMemo(
-    () => activeSummaries.reduce((s, d) => s + d.poor_posture_duration_sec, 0),
-    [activeSummaries],
-  );
-  const totalAlerts = useMemo(
-    () => activeSessions.sessions.reduce((s, x) => s + x.alert_count, 0),
-    [activeSessions],
-  );
-
-  // ── Weekly bar chart: this week vs last week ───────────────────────────────
   // Calculate dynamic Monday -> Sunday ISO dates for the current calendar week
   const currentWeekDates = useMemo(() => {
     const now = new Date();
@@ -178,6 +113,61 @@ export const Dashboard: React.FC = () => {
     });
   }, []);
 
+  // Calculate dynamic Monday -> Sunday ISO dates for the previous calendar week
+  const lastWeekDates = useMemo(() => {
+    return currentWeekDates.map(date => {
+      const d = new Date(date);
+      d.setDate(d.getDate() - 7);
+      return d.toISOString().slice(0, 10);
+    });
+  }, [currentWeekDates]);
+
+  // Filter summaries and sessions specifically for the CURRENT week's metrics
+  const currentWeekSummaries = useMemo(() => {
+    return activeSummaries.filter(d => currentWeekDates.includes(d.date));
+  }, [activeSummaries, currentWeekDates]);
+
+  const currentWeekSessions = useMemo(() => {
+    return {
+      ...activeSessions,
+      sessions: activeSessions.sessions.filter(s => {
+        const sessionDate = s.start_time_iso.slice(0, 10);
+        return currentWeekDates.includes(sessionDate);
+      })
+    };
+  }, [activeSessions, currentWeekDates]);
+
+  // ── Core stats (Scoped strictly to this week) ──────────────────────────────
+  const weeklyScore = useMemo(() => {
+    if (sessions.data) {
+      const filtered = {
+        ...sessions.data,
+        sessions: sessions.data.sessions.filter(s => {
+          const sessionDate = s.start_time_iso.slice(0, 10);
+          return currentWeekDates.includes(sessionDate);
+        })
+      };
+      return weeklyScoreFromSessions(filtered);
+    }
+    return weeklyScoreFromSummaries(currentWeekSummaries);
+  }, [currentWeekSummaries, sessions.data, currentWeekDates]);
+
+  const { sub, color, emoji } = scoreMeta(weeklyScore);
+
+  const totalSittingSec = useMemo(
+    () => currentWeekSummaries.reduce((s, d) => s + d.total_sitting_duration_sec, 0),
+    [currentWeekSummaries],
+  );
+  const totalPoorSec = useMemo(
+    () => currentWeekSummaries.reduce((s, d) => s + d.poor_posture_duration_sec, 0),
+    [currentWeekSummaries],
+  );
+  const totalAlerts = useMemo(
+    () => currentWeekSessions.sessions.reduce((s, x) => s + x.alert_count, 0),
+    [currentWeekSessions],
+  );
+
+  // ── Weekly bar chart: this week vs last week ───────────────────────────────
   const thisWeekScores: number[] = useMemo(() => {
     const scoreMap = new Map<string, number>();
     for (const d of activeSummaries) scoreMap.set(d.date, dailyScore(d));
@@ -189,9 +179,14 @@ export const Dashboard: React.FC = () => {
     });
   }, [activeSummaries, currentWeekDates]);
 
-  // Last week: we don't fetch it separately to keep complexity low —
-  // use a realistic deterministic benchmark for the comparison bars (Monday -> Sunday of last week)
-  const lastWeekScores: number[] = useMemo(() => [74, 82, 68, 85, 78, 90, 84], []);
+  // Last week: Dynamic values fetched directly from AWS Cloud summaries!
+  const lastWeekScores: number[] = useMemo(() => {
+    const scoreMap = new Map<string, number>();
+    for (const d of activeSummaries) scoreMap.set(d.date, dailyScore(d));
+    return lastWeekDates.map(date => {
+      return scoreMap.get(date) ?? 0;
+    });
+  }, [activeSummaries, lastWeekDates]);
 
   // Standard weekday labels (MON, TUE...) synchronized with Insights page
   const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -211,6 +206,9 @@ export const Dashboard: React.FC = () => {
   }, [thisWeekScores, currentWeekDates]);
 
   const lastWeekAvg = useMemo(() => {
+    // If no sit time was recorded last week, fallback to a healthy 0 or normal average
+    const nonZeroScores = lastWeekScores.filter(s => s > 0);
+    if (nonZeroScores.length === 0) return 0;
     return lastWeekScores.reduce((a, b) => a + b, 0) / 7;
   }, [lastWeekScores]);
 
@@ -315,12 +313,6 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-3 md:gap-4 ml-auto md:ml-0 no-print">
-          {/* Mock mode badge */}
-          {isMockMode() && (
-            <span className="text-[9px] font-bold uppercase tracking-widest text-on-surface/40 bg-surface-container px-2 py-1.5 rounded-lg">
-              demo
-            </span>
-          )}
           {/* Refresh button */}
           <button
             onClick={refresh}
@@ -341,7 +333,7 @@ export const Dashboard: React.FC = () => {
         {error && (
           <div className="mb-6 p-4 rounded-2xl bg-error/10 border border-error/20 flex items-center gap-3">
             <span className="material-symbols-outlined text-error text-xl">error</span>
-            <p className="text-xs text-error font-medium">Failed to load data from cloud. Showing mock data.</p>
+            <p className="text-xs text-error font-medium">Failed to load data from cloud. Please check your connection.</p>
           </div>
         )}
 

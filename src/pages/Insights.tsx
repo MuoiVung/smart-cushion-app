@@ -1,16 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   fetchSessions,
   fetchSummaries,
   getApiConfig,
-  isMockMode,
-  isoDaysAgo,
   secToMin,
   toFriendlyBuckets,
   todayIso,
   type DailySummary,
   type SessionsResponse,
-  type PostureDistributionPct,
 } from '../lib/api';
 import { useApiData } from '../hooks/useApiData';
 
@@ -34,15 +31,24 @@ function bucketByDay(sessions: SessionsResponse): DayBucket[] {
     cur.poor += poorMin;
     map.set(d, cur);
   }
-  // Last 7 days, oldest → newest, labelled by weekday.
+  
+  // Calculate dynamic Monday -> Sunday ISO dates for the current calendar week
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMon = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMon);
+  const currentWeekDates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+
   const out: DayBucket[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = isoDaysAgo(i);
-    const day = new Date(date).getDay(); // 0 = Sun
-    const idx = (day + 6) % 7; // 0 = Mon
+  currentWeekDates.forEach((date, i) => {
     const v = map.get(date) ?? { good: 0, poor: 0 };
-    out.push({ label: DAY_LABELS[idx], date, goodMin: v.good, poorMin: v.poor });
-  }
+    out.push({ label: DAY_LABELS[i], date, goodMin: v.good, poorMin: v.poor });
+  });
   return out;
 }
 
@@ -95,10 +101,29 @@ function analyzeTimeOfDay(sessions: SessionsResponse) {
 }
 
 export const Insights: React.FC = () => {
-  const [refreshState, setRefreshState] = useState<number>(0);
   const cfg = useMemo(getApiConfig, []);
   const today = useMemo(todayIso, []);
-  const from = useMemo(() => isoDaysAgo(6), []);
+  const from = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMon = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMon);
+    return monday.toISOString().slice(0, 10);
+  }, []);
+
+  const currentWeekDates = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMon = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMon);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    });
+  }, []);
 
   const summaries = useApiData<DailySummary[]>(
     () => fetchSummaries(cfg.deviceId, from, today),
@@ -114,119 +139,22 @@ export const Insights: React.FC = () => {
   const refresh = () => {
     summaries.refresh();
     sessions.refresh();
-    setRefreshState(prev => prev + 1);
   };
 
-  // Generate active summaries (dynamic mock dataset under mock mode)
+  // Generate active summaries (real cloud data only)
   const activeSummaries = useMemo<DailySummary[] | null>(() => {
-    if (!isMockMode()) return summaries.data;
-
-    // 4 scenarios: score always 50–80%, each with a different Key Posture.
-    // poor_posture_duration_sec (→ score) and posture_distribution_pct (→ key posture)
-    // are INDEPENDENT fields, so we set them separately.
-    //   dom: 0=Upright  1=Slouching Forward  2=Lean Right  3=Lean Left
-    const SCENARIOS = [
-      { dom: 0, label: 'Upright dominant'            },
-      { dom: 1, label: 'Slouching Forward dominant'  },
-      { dom: 2, label: 'Lean Right dominant'         },
-      { dom: 3, label: 'Lean Left dominant'          },
-    ];
-
-    // Pick a completely random key posture on each refresh
-    const scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
-
-    const out: DailySummary[] = [];
-    const dates = Array.from({ length: 7 }, (_, i) => isoDaysAgo(6 - i));
-
-    for (let i = 0; i < 7; i++) {
-      const date = dates[i];
-      const sittingMins = [120, 180, 90, 240, 150, 210, 80];
-      const totalMin = sittingMins[i] + ((refreshState * 13 + i * 7) % 31) - 15;
-      const totalSec = totalMin * 60;
-
-      // --- Score: independently target 50–80% ---
-      const targetScore = 52 + Math.random() * 24; // 52–76% per day
-      const poorSec = Math.round(totalSec * (1 - targetScore / 100));
-
-      // --- Posture distribution: dominant posture guaranteed highest % ---
-      // domPct is set high enough (45–60%) so the 3 others can't individually exceed it
-      const domPct = Math.round(45 + Math.random() * 15); // 45–60%
-      const remaining = 100 - domPct;                      // 40–55% split 3 ways
-      const cap = domPct - 1; // each other posture must stay strictly below domPct
-
-      // Generate 3 values each capped at cap, summing to remaining
-      const a = Math.round(Math.random() * Math.min(cap, remaining - 2));
-      const b = Math.round(Math.random() * Math.min(cap, remaining - a - 1));
-      const c = Math.max(0, Math.min(cap, remaining - a - b));
-
-      // Assign: domPct → dominant slot, a/b/c → the other 3
-      let upright = 0, slouch = 0, lr = 0, ll = 0;
-      if (scenario.dom === 0) { upright = domPct; slouch = a;      lr = b; ll = c; }
-      else if (scenario.dom === 1) { slouch = domPct; upright = a; lr = b; ll = c; }
-      else if (scenario.dom === 2) { lr    = domPct; upright = a;  slouch = b; ll = c; }
-      else                         { ll    = domPct; upright = a;  slouch = b; lr = c; }
-
-      const distribution: PostureDistributionPct = {
-        nup_pct:  upright,
-        lf_pct:   slouch,
-        lb_pct:   0,
-        lfsr_pct: 0,
-        lfsl_pct: 0,
-        crl_pct:  lr,
-        cll_pct:  ll,
-        crll_pct: 0,
-        clll_pct: 0,
-      };
-
-      out.push({
-        schema_version: '1.0',
-        device_id: cfg.deviceId,
-        date,
-        total_sitting_duration_sec: totalSec,
-        poor_posture_duration_sec:  poorSec,
-        alert_count: Math.round(totalMin * (slouch / 100) * 0.4),
-        posture_distribution_pct: distribution,
-      });
-    }
-    return out;
-  }, [isMockMode(), refreshState, summaries.data, cfg.deviceId]);
+    return summaries.data;
+  }, [summaries.data]);
 
   const buckets = sessions.data ? bucketByDay(sessions.data) : [];
   const { weeklyScore: actualWeeklyScore } = weeklyStats(buckets);
-  const weeklyScore = useMemo(() => {
-    if (!isMockMode()) return actualWeeklyScore;
-    if (!activeSummaries) return 0;
-    let totalSec = 0;
-    let poorSec = 0;
-    for (const d of activeSummaries) {
-      totalSec += d.total_sitting_duration_sec;
-      poorSec += d.poor_posture_duration_sec;
-    }
-    const goodSec = totalSec - poorSec;
-    return totalSec > 0 ? Number(((goodSec / totalSec) * 100).toFixed(1)) : 0;
-  }, [isMockMode(), activeSummaries, actualWeeklyScore]);
+  const weeklyScore = actualWeeklyScore;
 
-  const mockTimeOfDay = useMemo(() => {
-    const randomRange = (min: number, max: number) => Number((Math.random() * (max - min) + min).toFixed(1));
-    return [
-      { label: 'Morning', sub: '06:00 - 12:00', score: randomRange(20, 100), icon: 'light_mode', color: 'text-amber-500' },
-      { label: 'Afternoon', sub: '12:00 - 18:00', score: randomRange(20, 100), icon: 'wb_sunny', color: 'text-primary' },
-      { label: 'Evening', sub: '18:00 - 00:00', score: randomRange(20, 100), icon: 'dark_mode', color: 'text-secondary' },
-      { label: 'Night', sub: '00:00 - 06:00', score: Math.random() > 0.25 ? randomRange(20, 100) : null, icon: 'bedtime', color: 'text-blue-400' },
-    ];
-  }, [refreshState]);
+  const timeOfDay = sessions.data ? analyzeTimeOfDay(sessions.data) : [];
 
-  const timeOfDay = isMockMode()
-    ? mockTimeOfDay
-    : (sessions.data ? analyzeTimeOfDay(sessions.data) : []);
+  const totalAlerts = sessions.data ? sessions.data.sessions.reduce((sum, s) => sum + s.alert_count, 0) : 0;
 
-  const totalAlerts = isMockMode()
-    ? (activeSummaries ? activeSummaries.reduce((sum, d) => sum + d.alert_count, 0) : 0)
-    : (sessions.data ? sessions.data.sessions.reduce((sum, s) => sum + s.alert_count, 0) : 0);
-
-  const totalSessions = isMockMode()
-    ? (activeSummaries ? activeSummaries.length * 2 + ((refreshState * 3) % 5) : 0)
-    : (sessions.data ? sessions.data.total_count : 0);
+  const totalSessions = sessions.data ? sessions.data.total_count : 0;
 
   // Aggregate Key Posture over 7 days (missing days count as 0% for the week)
   let upSum = 0, sfSum = 0, lbSum = 0, lrSum = 0, llSum = 0;
@@ -249,23 +177,21 @@ export const Insights: React.FC = () => {
   const llAvg = llSum / 7;
 
   // Build a 7-day posture distribution lookup (0=Mon, 6=Sun)
-  const dailyDistribution = Array.from({ length: 7 }, (_, dayIdx) => {
-    // Find the summary in activeSummaries that matches this dayIndex
-    const summary = (activeSummaries || []).find(s => {
-      const dIndex = (new Date(s.date).getDay() + 6) % 7;
-      return dIndex === dayIdx;
+  const dailyDistribution = useMemo(() => {
+    return currentWeekDates.map((date) => {
+      const summary = (activeSummaries || []).find((s) => s.date === date);
+      if (summary) {
+        return toFriendlyBuckets(summary.posture_distribution_pct);
+      }
+      return {
+        upright_pct: 0,
+        slouching_forward_pct: 0,
+        leaning_back_pct: 0,
+        leaning_right_pct: 0,
+        leaning_left_pct: 0,
+      };
     });
-    if (summary) {
-      return toFriendlyBuckets(summary.posture_distribution_pct);
-    }
-    return {
-      upright_pct: 0,
-      slouching_forward_pct: 0,
-      leaning_back_pct: 0,
-      leaning_right_pct: 0,
-      leaning_left_pct: 0,
-    };
-  });
+  }, [currentWeekDates, activeSummaries]);
 
   const rows = [
     {
@@ -362,14 +288,7 @@ export const Insights: React.FC = () => {
     return "Performance stable. Keep it up!";
   };
 
-  // Mock trend — recalculates when refreshState changes (no hook-in-conditional)
-  const mockTrend = useMemo(() => {
-    const val = Number((Math.random() * 20 - 10).toFixed(1));
-    return val >= 0 ? `+${val}%` : `${val}%`;
-  }, [refreshState]);
-  const trend = isMockMode()
-    ? mockTrend
-    : (weeklyScore >= 80 ? '+3%' : weeklyScore >= 60 ? '+1%' : '-2%');
+  const trend = weeklyScore >= 80 ? '+3%' : weeklyScore >= 60 ? '+1%' : '-2%';
 
   const getScoreInfo = (s: number) => {
     if (s <= 50) return { sub: 'Needs Work', color: 'text-error', icon: null };
@@ -407,28 +326,41 @@ export const Insights: React.FC = () => {
     },
   ];
 
-  const weeklyData = (activeSummaries || [])
-    .map((summary) => {
-      const date = summary.date;
-      const dayIndex = (new Date(date).getDay() + 6) % 7; // 0=Mon
-      const label = DAY_LABELS[dayIndex];
-      const fb = toFriendlyBuckets(summary.posture_distribution_pct);
-      const poorMin = secToMin(summary.poor_posture_duration_sec);
-      const totalSittingMin = secToMin(summary.total_sitting_duration_sec);
+  const weeklyData = useMemo(() => {
+    return currentWeekDates.map((date, i) => {
+      const label = DAY_LABELS[i];
+      const summary = (activeSummaries || []).find((s) => s.date === date);
+      if (summary) {
+        const fb = toFriendlyBuckets(summary.posture_distribution_pct);
+        const poorMin = secToMin(summary.poor_posture_duration_sec);
+        const totalSittingMin = secToMin(summary.total_sitting_duration_sec);
+        return {
+          dayIndex: i,
+          label,
+          date,
+          poorMin,
+          totalSittingMin,
+          upright: fb.upright_pct,
+          slouch: fb.slouching_forward_pct,
+          leaningBack: fb.leaning_back_pct,
+          leaningRight: fb.leaning_right_pct,
+          leaningLeft: fb.leaning_left_pct,
+        };
+      }
       return {
-        dayIndex,
+        dayIndex: i,
         label,
         date,
-        poorMin,
-        totalSittingMin,
-        upright: fb.upright_pct,
-        slouch: fb.slouching_forward_pct,
-        leaningBack: fb.leaning_back_pct,
-        leaningRight: fb.leaning_right_pct,
-        leaningLeft: fb.leaning_left_pct,
+        poorMin: 0,
+        totalSittingMin: 0,
+        upright: 0,
+        slouch: 0,
+        leaningBack: 0,
+        leaningRight: 0,
+        leaningLeft: 0,
       };
-    })
-    .sort((a, b) => a.dayIndex - b.dayIndex);
+    });
+  }, [currentWeekDates, activeSummaries]);
 
   const downloadReport = () => {
     window.print();
@@ -509,7 +441,7 @@ export const Insights: React.FC = () => {
         </div>
 
         {/* Only render if data exists */}
-        {sessions.data && sessions.data.sessions.length > 0 && (
+        {sessions.data && (
           <>
             <div className="mb-8 md:mb-12">
               <div className="bg-surface-container-low p-6 md:p-8 rounded-[2rem] md:rounded-3xl">
