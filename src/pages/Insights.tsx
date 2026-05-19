@@ -408,7 +408,7 @@ export const Insights: React.FC = () => {
   ];
 
   const weeklyData = (activeSummaries || [])
-    .map((summary, i) => {
+    .map((summary) => {
       const date = summary.date;
       const dayIndex = (new Date(date).getDay() + 6) % 7; // 0=Mon
       const label = DAY_LABELS[dayIndex];
