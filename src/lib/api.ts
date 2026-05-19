@@ -155,12 +155,10 @@ export async function fetchSummaries(
     dates.push(d.toISOString().slice(0, 10));
   }
 
-  // Fetch sequentially to prevent parallel concurrency overloading (rate limits & Cold Starts) on AWS.
-  const results: DailySummary[] = [];
-  for (const date of dates) {
-    results.push(await fetchSummary(deviceId, date));
-  }
-  return results;
+  // Parallel execution for maximum speed and instant loading!
+  // Our robust activeSummaryRequests cache will perfectly collapse any duplicate concurrent
+  // queries triggered by React 18 Strict Mode or double component mounting.
+  return Promise.all(dates.map((date) => fetchSummary(deviceId, date)));
 }
 
 // Active sessions request promise tracker to collapse duplicate concurrent queries.
