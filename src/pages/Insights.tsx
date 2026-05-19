@@ -444,32 +444,26 @@ export const Insights: React.FC = () => {
           .bg-surface-container-low { background: white !important; border: 1px solid #eee; }
         }
       `}</style>
-
-      {/* Sync banner */}
-      <div className="no-print bg-secondary/90 backdrop-blur-xl px-4 md:px-8 py-2 md:py-3 flex flex-col md:flex-row items-center justify-between text-white gap-2">
-        <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center">
-          <span className="material-symbols-outlined text-xs md:text-sm">
-            {error ? 'cloud_off' : isMockMode() ? 'cloud_queue' : 'cloud_done'}
-          </span>
-          <span className="text-[10px] md:text-xs font-medium tracking-wide truncate">
-            {error ? `Error: ${error}` : isMockMode() ? 'Sample Data Mode' : `Live Data: ${cfg.deviceId}`}
-          </span>
-
-        </div>
-        <button
-          onClick={refresh}
-          className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest opacity-80 hover:opacity-100 transition-opacity"
-        >
-          {loading ? 'Ref…' : 'Refresh'}
-        </button>
-      </div>
-
-      <header className="px-4 md:px-8 py-4 md:py-6 flex justify-between items-center w-full">
+      <header className="flex justify-between items-center w-full px-4 md:px-8 py-6 md:py-8 gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tighter text-on-surface leading-none">PostureAI</h1>
-          <p className="text-[10px] md:text-sm font-medium tracking-tight text-on-surface/60">Performance Analysis</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-on-surface leading-none">My Insights</h1>
+          <p className="text-lg md:text-xl font-medium tracking-tight text-on-surface/60 mt-1">Performance Analysis</p>
         </div>
-        <div className="flex items-center gap-4 md:gap-6 no-print">
+        <div className="flex items-center gap-3 md:gap-4 no-print">
+          {/* Refresh button */}
+          <button
+            onClick={refresh}
+            disabled={loading}
+            className="flex items-center gap-2 px-5 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant/30 rounded-xl text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-md shadow-black/5 disabled:opacity-40"
+            title="Refresh data"
+          >
+            <span className={`material-symbols-outlined text-sm md:text-base ${loading ? 'animate-spin' : ''}`}>
+              refresh
+            </span>
+            <span>Refresh</span>
+          </button>
+
+          {/* Report button */}
           <button
             onClick={downloadReport}
             className="hidden sm:flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold tracking-wide hover:opacity-90 transition-all shadow-lg shadow-primary/20"
@@ -477,20 +471,18 @@ export const Insights: React.FC = () => {
             <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
             Report
           </button>
-          <div className="flex items-center gap-3 md:gap-4 border-l border-outline-variant/30 pl-4 md:pl-6">
-            <span className="material-symbols-outlined text-on-surface/60 cursor-pointer text-xl">notifications</span>
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container-low border border-outline-variant/20">
-              <img
-                className="w-full h-full object-cover"
-                alt="User avatar"
-                src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop"
-              />
-            </div>
-          </div>
         </div>
       </header>
 
       <section className="px-4 md:px-8 pb-12">
+        {/* Error banner */}
+        {error && (
+          <div className="mb-6 p-4 rounded-2xl bg-error/10 border border-error/20 flex items-center gap-3">
+            <span className="material-symbols-outlined text-error text-xl">error</span>
+            <p className="text-xs text-error font-medium">Failed to load data from cloud. Showing mock data.</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
           {stats.map((stat, i) => (
             <div

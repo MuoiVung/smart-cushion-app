@@ -244,8 +244,8 @@ export const Dashboard: React.FC = () => {
   const rtStatus = useMemo(() => {
     if (!isWsConnected) {
       return {
-        title: 'Not Connected',
-        sub: 'Click below to connect',
+        title: 'Smart Cushion Offline',
+        sub: 'Cushion is offline',
         icon: 'sensors_off',
         iconBg: 'bg-on-surface/10 text-on-surface/40',
         pulseBg: 'bg-on-surface/30',
@@ -307,43 +307,32 @@ export const Dashboard: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex flex-wrap justify-between items-center w-full px-4 md:px-8 py-6 md:py-8 gap-4">
+      <header className="flex justify-between items-center w-full px-4 md:px-8 py-6 md:py-8 gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-on-surface leading-none">PostureAI</h1>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-on-surface leading-none">My Coach</h1>
           <p className="text-lg md:text-xl font-medium tracking-tight text-on-surface/60 mt-1">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <div className="flex items-center gap-4 md:gap-8 ml-auto md:ml-0">
-          <div className="flex items-center gap-2">
-            {/* Mock mode badge */}
-            {isMockMode() && (
-              <span className="text-[9px] font-bold uppercase tracking-widest text-on-surface/40 bg-surface-container px-2 py-1 rounded-lg">
-                demo
-              </span>
-            )}
-            {/* Refresh button */}
-            <button
-              onClick={refresh}
-              disabled={loading}
-              className="p-2 rounded-xl hover:bg-surface-container transition-colors disabled:opacity-40"
-              title="Refresh data"
-            >
-              <span className={`material-symbols-outlined text-on-surface/60 text-xl ${loading ? 'animate-spin' : ''}`}>
-                refresh
-              </span>
-            </button>
-          </div>
-          <div className="flex items-center gap-3 md:gap-4">
-            <span className="material-symbols-outlined text-on-surface/60 cursor-pointer text-xl md:text-2xl">notifications</span>
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-low border border-outline-variant/10 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop"
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+        <div className="flex items-center gap-3 md:gap-4 ml-auto md:ml-0 no-print">
+          {/* Mock mode badge */}
+          {isMockMode() && (
+            <span className="text-[9px] font-bold uppercase tracking-widest text-on-surface/40 bg-surface-container px-2 py-1.5 rounded-lg">
+              demo
+            </span>
+          )}
+          {/* Refresh button */}
+          <button
+            onClick={refresh}
+            disabled={loading}
+            className="flex items-center gap-2 px-5 py-2.5 bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant/30 rounded-xl text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-md shadow-black/5 disabled:opacity-40"
+            title="Refresh data"
+          >
+            <span className={`material-symbols-outlined text-sm md:text-base ${loading ? 'animate-spin' : ''}`}>
+              refresh
+            </span>
+            <span>Refresh</span>
+          </button>
         </div>
       </header>
 
