@@ -13,65 +13,6 @@ import { useApiData } from '../hooks/useApiData';
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-type DayBucket = {
-  label: string;
-  date: string;
-  goodMin: number;
-  poorMin: number;
-};
-
-function bucketByDay(sessions: SessionsResponse): DayBucket[] {
-  const map = new Map<string, { good: number; poor: number }>();
-  for (const s of sessions.sessions) {
-    const d = s.start_time_iso.slice(0, 10);
-    const durMin = secToMin(s.duration_sec);
-    const poorMin = secToMin(s.poor_posture_duration_sec);
-    const cur = map.get(d) ?? { good: 0, poor: 0 };
-    cur.good += Math.max(0, durMin - poorMin);
-    cur.poor += poorMin;
-    map.set(d, cur);
-  }
-  
-  // Calculate dynamic Monday -> Sunday ISO dates for the current calendar week
-  const now = new Date();
-  const day = now.getDay();
-  const diffToMon = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMon);
-  const currentWeekDates = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d.toISOString().slice(0, 10);
-  });
-
-  const out: DayBucket[] = [];
-  currentWeekDates.forEach((date, i) => {
-    const v = map.get(date) ?? { good: 0, poor: 0 };
-    out.push({ label: DAY_LABELS[i], date, goodMin: v.good, poorMin: v.poor });
-  });
-  return out;
-}
-
-function weeklyStats(buckets: DayBucket[]) {
-  let goodTotal = 0;
-  let totalAll = 0;
-  let best: DayBucket | null = null;
-  let worst: DayBucket | null = null;
-  for (const b of buckets) {
-    const total = b.goodMin + b.poorMin;
-    if (total === 0) continue;
-    const goodPct = (b.goodMin / total) * 100;
-    goodTotal += b.goodMin;
-    totalAll += total;
-    if (!best || goodPct > (best.goodMin / (best.goodMin + best.poorMin)) * 100) best = b;
-    if (!worst || goodPct < (worst.goodMin / (worst.goodMin + worst.poorMin)) * 100) worst = b;
-  }
-  const weeklyScore = totalAll > 0 ? Math.round((goodTotal / totalAll) * 100) : 0;
-  return { weeklyScore, best, worst };
-}
-
-
-
 function analyzeTimeOfDay(sessions: SessionsResponse) {
   const buckets = {
     morning: { good: 0, total: 0 },   // 06-12
@@ -98,6 +39,30 @@ function analyzeTimeOfDay(sessions: SessionsResponse) {
     { label: 'Evening', sub: '18:00 - 00:00', score: getPct(buckets.evening), icon: 'dark_mode', color: 'text-secondary' },
     { label: 'Night', sub: '00:00 - 06:00', score: getPct(buckets.night), icon: 'bedtime', color: 'text-blue-400' },
   ];
+}
+
+/** Weekly score from all summaries (divides by total sitting time). */
+function weeklyScoreFromSummaries(summaries: DailySummary[]): number {
+  let totalSec = 0;
+  let poorSec = 0;
+  for (const d of summaries) {
+    totalSec += d.total_sitting_duration_sec;
+    poorSec  += d.poor_posture_duration_sec;
+  }
+  if (totalSec === 0) return 0;
+  return Math.round(((totalSec - poorSec) / totalSec) * 100);
+}
+
+/** Weekly score from sessions response. */
+function weeklyScoreFromSessions(sessions: SessionsResponse): number {
+  let totalSec = 0;
+  let poorSec  = 0;
+  for (const s of sessions.sessions) {
+    totalSec += s.duration_sec;
+    poorSec  += s.poor_posture_duration_sec;
+  }
+  if (totalSec === 0) return 0;
+  return Math.round(((totalSec - poorSec) / totalSec) * 100);
 }
 
 export const Insights: React.FC = () => {
@@ -146,9 +111,23 @@ export const Insights: React.FC = () => {
     return summaries.data;
   }, [summaries.data]);
 
-  const buckets = sessions.data ? bucketByDay(sessions.data) : [];
-  const { weeklyScore: actualWeeklyScore } = weeklyStats(buckets);
-  const weeklyScore = actualWeeklyScore;
+  const currentWeekSummaries = useMemo(() => {
+    return (activeSummaries || []).filter(d => currentWeekDates.includes(d.date));
+  }, [activeSummaries, currentWeekDates]);
+
+  const weeklyScore = useMemo(() => {
+    if (sessions.data) {
+      const filtered = {
+        ...sessions.data,
+        sessions: sessions.data.sessions.filter(s => {
+          const sessionDate = s.start_time_iso.slice(0, 10);
+          return currentWeekDates.includes(sessionDate);
+        })
+      };
+      return weeklyScoreFromSessions(filtered);
+    }
+    return weeklyScoreFromSummaries(currentWeekSummaries);
+  }, [currentWeekSummaries, sessions.data, currentWeekDates]);
 
   const timeOfDay = sessions.data ? analyzeTimeOfDay(sessions.data) : [];
 
@@ -583,13 +562,9 @@ export const Insights: React.FC = () => {
                     <p className="text-[10px] md:text-xs text-primary/60">Personalized suggestion based on your posture data</p>
                   </div>
                 </div>
-                <p className="text-[13px] md:text-sm text-on-surface/70 leading-relaxed mb-6 italic">
+                <p className="text-[13px] md:text-sm text-on-surface/70 leading-relaxed italic">
                   {getAiAdvisorMessage(weeklyScore, primaryDominant.label)}
                 </p>
-                <div className="space-y-3">
-                  <button className="w-full py-2.5 md:py-3 bg-primary text-white rounded-xl text-[10px] md:text-xs font-bold tracking-wide hover:opacity-90 transition-opacity">Correction Drill</button>
-                  <button className="w-full py-2.5 md:py-3 bg-white text-on-surface/50 rounded-xl text-[10px] md:text-xs font-bold tracking-wide border border-outline-variant/20 hover:bg-surface-bright transition-colors">Set Alert</button>
-                </div>
               </div>
             </div>
           </>
