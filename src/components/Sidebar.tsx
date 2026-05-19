@@ -17,9 +17,6 @@ const capyItems = [
   { icon: 'menu_book',       label: 'My Passport',    path: '/passport',   public: false },
 ];
 
-const aiItems = [
-  { icon: 'forum', label: 'My AI Advisor', path: '/ai-advisor', public: false },
-];
 
 const SidebarItem: React.FC<{ item: typeof mainItems[0], isDemo: boolean }> = ({ item, isDemo }) => {
   const isLocked = isDemo && !item.public;
@@ -95,16 +92,9 @@ export const Sidebar: React.FC = () => {
           <SidebarItem key={item.path} item={item} isDemo={isDemo} />
         ))}
 
-        <p className={sectionLabel}>AI Advisor</p>
-        {aiItems.map(item => (
-          <SidebarItem key={item.path} item={item} isDemo={isDemo} />
-        ))}
 
         <div className="mt-auto pt-6 border-t border-capy-border/50 mx-3">
-          <SidebarItem 
-            item={{ icon: 'settings', label: 'Settings', path: '/settings', public: false }} 
-            isDemo={isDemo} 
-          />
+
           <button 
             onClick={handleLogout}
             className={cn(

@@ -3,9 +3,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { LiveMonitor } from './pages/LiveMonitor';
 import { Insights } from './pages/Insights';
-import { AIAdvisor } from './pages/AIAdvisor';
 import { SessionHistory } from './pages/SessionHistory';
-import { Settings } from './pages/Settings';
 import { Passport } from './pages/Passport';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -37,9 +35,7 @@ const AppContent = () => {
               {/* Only full users can see these */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
-              <Route path="/ai-advisor" element={<ProtectedRoute><AIAdvisor /></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/gacha" element={<ProtectedRoute><GachaPage /></ProtectedRoute>} />
               <Route path="/collection" element={<ProtectedRoute><CollectionPage /></ProtectedRoute>} />
               <Route path="/passport" element={<ProtectedRoute><Passport /></ProtectedRoute>} />
