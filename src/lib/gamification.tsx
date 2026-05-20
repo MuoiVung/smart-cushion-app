@@ -273,7 +273,7 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const now = Date.now();
     const dt = now - lastTickRef.current;
     lastTickRef.current = now;
-    if (msg.posture === 'NUP' && dt < 5000) {
+    if (msg.posture === 'UPRIGHT' && dt < 5000) {
       goodAccumRef.current += dt;
       while (goodAccumRef.current >= 60_000) {
         goodAccumRef.current -= 60_000;

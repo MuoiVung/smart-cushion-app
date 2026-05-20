@@ -267,28 +267,25 @@ export const Dashboard: React.FC = () => {
           iconBg: 'bg-amber-500/10 text-amber-500',
           pulseBg: 'bg-amber-500',
         };
-      case 'NUP':
-        const nupScore = lastMsg?.posture_accuracy_score 
+      case 'UPRIGHT':
+        const uprightScore = lastMsg?.posture_accuracy_score 
           ? (lastMsg.posture_accuracy_score > 1 ? lastMsg.posture_accuracy_score : lastMsg.posture_accuracy_score * 100) 
           : 94.2;
         return {
-          title: 'Natural Upright Posture',
-          sub: `Confidence: ${nupScore.toFixed(1)}%`,
+          title: 'Sitting Upright',
+          sub: `Confidence: ${uprightScore.toFixed(1)}%`,
           icon: 'check_circle',
           iconBg: 'bg-[#10b981]/10 text-[#10b981]',
           pulseBg: 'bg-[#10b981]',
         };
-      default:
-        // Poor posture: LF, LB, LFSR, LFSL, CRL, CLL, CRLL, CLLL
+      case 'FORWARD':
+      case 'BACKWARD':
+      case 'RIGHT':
+      case 'LEFT':
         const poorLabel = 
-          currentPosture === 'LF'   ? 'Lean Forward' :
-          currentPosture === 'LB'   ? 'Lean Backward' :
-          currentPosture === 'LFSR' ? 'Lean Forward Support Right' :
-          currentPosture === 'LFSL' ? 'Lean Forward Support Left' :
-          currentPosture === 'CRL'  ? 'Cross-Right Legged' :
-          currentPosture === 'CLL'  ? 'Cross-Left Legged' :
-          currentPosture === 'CRLL' ? 'Cross-Right Legged Deep' :
-          currentPosture === 'CLLL' ? 'Cross-Left Legged Deep' : 'Poor Posture';
+          currentPosture === 'FORWARD'  ? 'Leaning Forward' :
+          currentPosture === 'BACKWARD' ? 'Leaning Backward' :
+          currentPosture === 'RIGHT'    ? 'Leaning Right' : 'Leaning Left';
         const badScore = lastMsg?.posture_accuracy_score 
           ? (lastMsg.posture_accuracy_score > 1 ? lastMsg.posture_accuracy_score : lastMsg.posture_accuracy_score * 100) 
           : 88.5;
@@ -298,6 +295,14 @@ export const Dashboard: React.FC = () => {
           icon: 'error',
           iconBg: 'bg-error/10 text-error',
           pulseBg: 'bg-error',
+        };
+      default:
+        return {
+          title: 'Unknown State',
+          sub: 'No person detected',
+          icon: 'help',
+          iconBg: 'bg-on-surface/10 text-on-surface/40',
+          pulseBg: 'bg-on-surface/30',
         };
     }
   }, [isWsConnected, currentPosture, lastMsg]);

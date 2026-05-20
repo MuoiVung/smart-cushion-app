@@ -140,7 +140,7 @@ export const LiveMonitor: React.FC = () => {
               <div className="min-w-[240px]">
                 <p className="text-xs font-bold uppercase tracking-wider text-capy-muted mb-1">Active Session</p>
                 <h2 className="text-2xl font-black tracking-tight leading-tight">{occupied ? 'Person Detected' : 'No Person'}</h2>
-                <p className="mt-1 text-xs font-medium text-capy-muted/80">{POSTURE_LABELS[posture]}</p>
+                <p className="mt-1 text-xs font-medium text-capy-muted/80">{POSTURE_LABELS[posture] || posture}</p>
               </div>
               <div className="text-right shrink-0">
                 <p className="text-xs font-bold uppercase tracking-wider text-capy-muted mb-1">Duration</p>

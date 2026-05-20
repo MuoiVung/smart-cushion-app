@@ -81,16 +81,28 @@ export function getApiConfig(): Config {
 
 
 
-async function request<T>(path: string): Promise<T> {
+async function request<T>(path: string, retries = 2, delay = 1000): Promise<T> {
   const cfg = getApiConfig();
   const url = `${cfg.baseUrl.replace(/\/$/, '')}${path}`;
-  const res = await fetch(url, {
-    headers: cfg.apiKey ? { 'x-api-key': cfg.apiKey } : {},
-  });
-  if (!res.ok) {
-    throw new Error(`API ${path} failed: ${res.status} ${res.statusText}`);
+  
+  for (let attempt = 1; attempt <= retries + 1; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: cfg.apiKey ? { 'x-api-key': cfg.apiKey } : {},
+      });
+      if (!res.ok) {
+        throw new Error(`API ${path} failed: ${res.status} ${res.statusText}`);
+      }
+      return (await res.json()) as T;
+    } catch (err) {
+      if (attempt > retries) {
+        throw err;
+      }
+      // Wait before retrying (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
+    }
   }
-  return (await res.json()) as T;
+  throw new Error('Unreachable');
 }
 
 // In-memory cache to prevent duplicate network calls for historical daily summaries.
@@ -111,17 +123,34 @@ export async function fetchSummary(
     return summaryCache[cacheKey];
   }
 
-  // 2. Collapse concurrent duplicate requests: reuse the in-flight promise.
+  // 2. Try loading from localStorage if it's a past date
+  if (date !== todayStr && typeof window !== 'undefined') {
+    const cached = localStorage.getItem(`cushion.cache.summary:${cacheKey}`);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as DailySummary;
+        summaryCache[cacheKey] = parsed;
+        return parsed;
+      } catch (e) {
+        // Ignore JSON parsing errors and fetch from network
+      }
+    }
+  }
+
+  // 3. Collapse concurrent duplicate requests: reuse the in-flight promise.
   if (activeSummaryRequests[cacheKey]) {
     return activeSummaryRequests[cacheKey];
   }
 
-  // 3. Fire new network request and track its promise.
+  // 4. Fire new network request and track its promise.
   const promise = request<DailySummary>(
     `/summary?device_id=${encodeURIComponent(deviceId)}&date=${encodeURIComponent(date)}`,
   ).then((data) => {
     if (date !== todayStr) {
       summaryCache[cacheKey] = data;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`cushion.cache.summary:${cacheKey}`, JSON.stringify(data));
+      }
     }
     delete activeSummaryRequests[cacheKey];
     return data;
@@ -151,10 +180,26 @@ export async function fetchSummaries(
     dates.push(d.toISOString().slice(0, 10));
   }
 
-  // Parallel execution for maximum speed and instant loading!
-  // Our robust activeSummaryRequests cache will perfectly collapse any duplicate concurrent
-  // queries triggered by React 18 Strict Mode or double component mounting.
-  return Promise.all(dates.map((date) => fetchSummary(deviceId, date)));
+  // To prevent overwhelming the server on initial load, we limit concurrency to 3
+  const limit = 3;
+  const results: DailySummary[] = new Array(dates.length);
+  let currentIndex = 0;
+
+  async function worker() {
+    while (currentIndex < dates.length) {
+      const index = currentIndex++;
+      results[index] = await fetchSummary(deviceId, dates[index]);
+    }
+  }
+
+  // Create workers to process tasks concurrently up to the limit
+  const workers = Array.from(
+    { length: Math.min(limit, dates.length) },
+    worker
+  );
+  
+  await Promise.all(workers);
+  return results;
 }
 
 // Active sessions request promise tracker to collapse duplicate concurrent queries.
