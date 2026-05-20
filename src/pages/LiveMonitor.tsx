@@ -252,8 +252,8 @@ export const LiveMonitor: React.FC = () => {
               {view.alertTitle}
             </h2>
 
-            {/* Fixed height container for AI Message and Button to prevent layout shifting */}
-            <div className="mt-6 flex flex-col items-center min-h-[140px]">
+            {/* Container for AI Message */}
+            <div className="mt-6 flex flex-col items-center pb-6">
               <div className="flex max-w-md items-start gap-3 px-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-capy-amber-soft border border-capy-border text-xl shadow-sm">
                   🦫
@@ -267,22 +267,6 @@ export const LiveMonitor: React.FC = () => {
                 }`}>
                   {view.aiMessage}
                 </div>
-              </div>
-
-              {/* Reserve space for button so it doesn't push the layout when it appears */}
-              <div className="h-20 flex items-center justify-center">
-                <AnimatePresence>
-                  {view.mood === 'bad' && (
-                    <motion.button
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="rounded-xl bg-capy-danger hover:opacity-90 px-8 py-3 font-bold text-white shadow-md transition-all active:scale-95"
-                    >
-                      Got it, I'll adjust!
-                    </motion.button>
-                  )}
-                </AnimatePresence>
               </div>
             </div>
           </div>
