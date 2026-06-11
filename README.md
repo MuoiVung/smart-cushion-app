@@ -164,14 +164,6 @@ This app is optimized for Vercel.
 3. Add your `VITE_API_BASE_URL` in the Vercel environment variables settings.
 4. Click **Deploy**.
 
----
-
-## 👥 Team Members & Roles
-
-| Member | Role                                  | Responsibility                                                                                                                                               |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Hoang Mai Vu** | Real-time Dashboard Architect | Developing the React/Vite frontend, WebSocket live monitor, Capybara animations, and Gacha user interface. |
-| **Dong Boi Thi** | Cloud & Dashboard Developer | AWS API integration, historical data charting, and fetching gamification states. |
 
 ---
 
